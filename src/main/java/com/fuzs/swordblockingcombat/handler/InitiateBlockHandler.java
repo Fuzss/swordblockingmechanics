@@ -1,10 +1,10 @@
 package com.fuzs.swordblockingcombat.handler;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.UseAction;
-import net.minecraft.util.ActionResultType;
+import net.minecraft.item.ItemSword;
+import net.minecraft.util.EnumActionResult;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -16,11 +16,11 @@ public class InitiateBlockHandler {
     @SubscribeEvent
     public void onRightClickItem(PlayerInteractEvent.RightClickItem evt) {
 
-        if (evt.getItemStack().getItem() instanceof SwordItem) {
-            ItemStack stack = evt.getPlayer().getHeldItemOffhand();
-            if (stack.getItem().getUseAction(stack) == UseAction.NONE) {
-                evt.getPlayer().setActiveHand(evt.getHand());
-                evt.setCancellationResult(ActionResultType.SUCCESS);
+        if (evt.getItemStack().getItem() instanceof ItemSword) {
+            ItemStack stack = evt.getEntityPlayer().getHeldItemOffhand();
+            if (stack.getItem().getUseAction(stack) == EnumAction.NONE) {
+                evt.getEntityPlayer().setActiveHand(evt.getHand());
+                evt.setCancellationResult(EnumActionResult.SUCCESS);
                 evt.setCanceled(true);
             }
         }
@@ -31,7 +31,7 @@ public class InitiateBlockHandler {
     @SubscribeEvent
     public void onItemUseStart(LivingEntityUseItemEvent.Start evt) {
 
-        if (evt.getItem().getItem() instanceof SwordItem) {
+        if (evt.getItem().getItem() instanceof ItemSword) {
             evt.setDuration(72000);
         }
 
@@ -41,9 +41,9 @@ public class InitiateBlockHandler {
     @SubscribeEvent
     public void onLivingHurt(LivingHurtEvent evt) {
 
-        if (evt.getEntityLiving() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) evt.getEntityLiving();
-            if (!evt.getSource().isUnblockable() && player.getActiveItemStack().getItem() instanceof SwordItem && evt.getAmount() > 0.0F) {
+        if (evt.getEntityLiving() instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) evt.getEntityLiving();
+            if (!evt.getSource().isUnblockable() && player.getActiveItemStack().getItem() instanceof ItemSword && evt.getAmount() > 0.0F) {
                 evt.setAmount((1.0F + evt.getAmount()) * 0.5F);
             }
         }

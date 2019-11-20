@@ -14,15 +14,15 @@ function initializeCoreMod() {
         'biped_model_patch': {
             'target': {
                 'type': 'CLASS',
-                'name': 'net.minecraft.client.renderer.entity.model.BipedModel'
+                'name': 'net.minecraft.client.renderer.entity.model.ModelBiped'
             },
             'transformer': function(classNode) {
                 patch({
                     obfName: "func_212844_a_",
                     name: "setRotationAngles",
-                    desc: "(Lnet/minecraft/entity/LivingEntity;FFFFFF)V",
+                    desc: "(FFFFFFLnet/minecraft/entity/Entity;)V",
                     patch: patchBipedModelSetRotationAngles
-                }, classNode, "BipedModel");
+                }, classNode, "ModelBiped");
                 return classNode;
             }
         }
@@ -73,10 +73,10 @@ function patchBipedModelSetRotationAngles(method, obfuscated) {
         var leftArm = obfuscated ? "field_178724_i" : "bipedLeftArm";
         var insnList = new InsnList();
         insnList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        insnList.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/model/BipedModel", rightArm, "Lnet/minecraft/client/renderer/entity/model/RendererModel;"));
+        insnList.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/model/ModelBiped", rightArm, "Lnet/minecraft/client/renderer/entity/model/ModelRenderer;"));
         insnList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-        insnList.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/model/BipedModel", leftArm, "Lnet/minecraft/client/renderer/entity/model/RendererModel;"));
-        insnList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/fuzs/swordblockingcombat/handler/ThirdPersonBlockingHandler", "setArmRotationAngel", "(Lnet/minecraft/client/renderer/entity/model/RendererModel;Lnet/minecraft/client/renderer/entity/model/RendererModel;)V", false));
+        insnList.add(new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/model/ModelBiped", leftArm, "Lnet/minecraft/client/renderer/entity/model/ModelRenderer;"));
+        insnList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/fuzs/swordblockingcombat/handler/ThirdPersonBlockingHandler", "setArmRotationAngel", "(Lnet/minecraft/client/renderer/entity/model/ModelRenderer;Lnet/minecraft/client/renderer/entity/model/ModelRenderer;)V", false));
         method.instructions.insertBefore(getNthPrevious(node, 2), insnList);
     }
 }

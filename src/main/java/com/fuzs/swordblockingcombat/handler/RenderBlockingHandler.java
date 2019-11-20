@@ -1,13 +1,13 @@
 package com.fuzs.swordblockingcombat.handler;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
+import net.minecraft.item.ItemSword;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumHandSide;
 import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -20,11 +20,11 @@ public class RenderBlockingHandler {
     public void renderSpecificHand(RenderSpecificHandEvent evt) {
 
         ItemStack stack = evt.getItemStack();
-        if (stack.getItem() instanceof SwordItem) {
-            ClientPlayerEntity player = this.mc.player;
+        if (stack.getItem() instanceof ItemSword) {
+            EntityPlayerSP player = this.mc.player;
             if (player.isHandActive() && player.getActiveHand() == evt.getHand()) {
                 GlStateManager.pushMatrix();
-                boolean rightHanded = (evt.getHand() == Hand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand().opposite()) == HandSide.RIGHT;
+                boolean rightHanded = (evt.getHand() == EnumHand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand().opposite()) == EnumHandSide.RIGHT;
                 this.transformSideFirstPerson(rightHanded ? 1.0F : -1.0F, evt.getEquipProgress());
                 this.mc.getFirstPersonRenderer().renderItemSide(player, stack, rightHanded ? ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !rightHanded);
                 GlStateManager.popMatrix();
