@@ -14,21 +14,29 @@ import static org.objectweb.asm.Opcodes.*;
 @SuppressWarnings("unused")
 public class ClassTransformer implements IClassTransformer {
 
-    private static final String[] classesBeingTransformed = {"net.minecraft.client.model.ModelBiped"};
+    private static final String[] TRANSFORMABLE_CLASSES = {"net.minecraft.client.model.ModelBiped"};
+    private static final String[] REQUIRED_CLASSES = {
+            "net.minecraft.client.model.ModelBiped",
+            "net.minecraft.client.model.ModelRenderer",
+            "net.minecraft.entity.Entity"
+    };
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
 
         boolean obfuscated = !name.equals(transformedName);
-        int index = Arrays.asList(classesBeingTransformed).indexOf(transformedName);
-        return index != -1 ? transform(index, basicClass, obfuscated) : basicClass;
+        int nameIndex = Arrays.asList(REQUIRED_CLASSES).indexOf(transformedName);
+        if (nameIndex != -1) {
+            REQUIRED_CLASSES[nameIndex] = name;
+        }
+        int mainIndex = Arrays.asList(TRANSFORMABLE_CLASSES).indexOf(transformedName);
+        return mainIndex != -1 ? transform(mainIndex, basicClass, obfuscated) : basicClass;
 
     }
 
     private static byte[] transform(int index, byte[] basicClass, boolean obfuscated) {
 
-        SwordBlockingCombat.LOGGER.info("Patching " + classesBeingTransformed[index] + "...");
-        System.out.println(obfuscated);
+        SwordBlockingCombat.LOGGER.info("Patching " + TRANSFORMABLE_CLASSES[index].replaceAll(".*\\.", "") + "...");
 
         try {
 
@@ -51,13 +59,13 @@ public class ClassTransformer implements IClassTransformer {
 
     private static void transformServerWorldEventHandler(ClassNode serverWorldEventHandlerClass, boolean obfuscated) {
 
-        String setRotationAnglesName = obfuscated ? "func_212844_a_" : "setRotationAngles";
-        String setRotationAnglesDescriptor = "(FFFFFFLnet/minecraft/entity/Entity;)V";
+        String setRotationAnglesName = obfuscated ? "a" : "setRotationAngles";
+        String setRotationAnglesDescriptor = obfuscated ? "(FFFFFFL" + REQUIRED_CLASSES[2] + ";)V" : "(FFFFFFLnet/minecraft/entity/Entity;)V";
 
-        String swingProgress = obfuscated ? "field_217112_c" : "swingProgress";
-        String rotateAngleY = obfuscated ? "field_78796_g" : "rotateAngleY";
-        String rightArm = obfuscated ? "field_178723_h" : "bipedRightArm";
-        String leftArm = obfuscated ? "field_178724_i" : "bipedLeftArm";
+        String swingProgress = obfuscated ? "o" : "swingProgress";
+        String rotateAngleY = obfuscated ? "g" : "rotateAngleY";
+        String rightArm = obfuscated ? "h" : "bipedRightArm";
+        String leftArm = obfuscated ? "i" : "bipedLeftArm";
 
         AbstractInsnNode foundNode = null;
 
@@ -84,10 +92,10 @@ public class ClassTransformer implements IClassTransformer {
                     InsnList insnList = new InsnList();
 
                     insnList.add(new VarInsnNode(ALOAD, 0));
-                    insnList.add(new FieldInsnNode(GETFIELD, "net/minecraft/client/model/ModelBiped", rightArm, "Lnet/minecraft/client/model/ModelRenderer;"));
+                    insnList.add(new FieldInsnNode(GETFIELD, obfuscated ? REQUIRED_CLASSES[0] : "net/minecraft/client/model/ModelBiped", rightArm, obfuscated ? "L" + REQUIRED_CLASSES[1] + ";" : "Lnet/minecraft/client/model/ModelRenderer;"));
                     insnList.add(new VarInsnNode(ALOAD, 0));
-                    insnList.add(new FieldInsnNode(GETFIELD, "net/minecraft/client/model/ModelBiped", leftArm, "Lnet/minecraft/client/model/ModelRenderer;"));
-                    insnList.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(ThirdPersonBlockingHook.class), "setArmRotationAngel", "(Lnet/minecraft/client/model/ModelRenderer;Lnet/minecraft/client/model/ModelRenderer;)V", false));
+                    insnList.add(new FieldInsnNode(GETFIELD, obfuscated ? REQUIRED_CLASSES[0] : "net/minecraft/client/model/ModelBiped", leftArm, obfuscated ? "L" + REQUIRED_CLASSES[1] + ";" : "Lnet/minecraft/client/model/ModelRenderer;"));
+                    insnList.add(new MethodInsnNode(INVOKESTATIC, Type.getInternalName(ThirdPersonBlockingHook.class), "setArmRotationAngel", obfuscated ? "(L" + REQUIRED_CLASSES[1] + ";L" + REQUIRED_CLASSES[1] + ";)V" : "(Lnet/minecraft/client/model/ModelRenderer;Lnet/minecraft/client/model/ModelRenderer;)V", false));
 
                     method.instructions.insertBefore(getNthNode(foundNode, -2), insnList);
 

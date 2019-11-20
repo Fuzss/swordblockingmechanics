@@ -23,7 +23,7 @@ public class SwordBlockingCombat {
     public static final String MODID = "swordblockingcombat";
     public static final String NAME = "Sword Blocking Combat";
     public static final String VERSION = "@VERSION@";
-    public static final String RANGE = "[1.12.2]";
+    public static final String RANGE = "[1.11.2, 1.12.2]";
     public static final String FINGERPRINT = "@FINGERPRINT@";
 
     public static final Logger LOGGER = LogManager.getLogger(SwordBlockingCombat.NAME);

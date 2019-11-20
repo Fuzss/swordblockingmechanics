@@ -8,7 +8,6 @@ import java.util.Map;
 @SuppressWarnings("unused")
 @IFMLLoadingPlugin.Name(SwordBlockingCombat.NAME)
 @IFMLLoadingPlugin.TransformerExclusions("com.fuzs.swordblockingcombat.asm")
-@IFMLLoadingPlugin.MCVersion("1.12.2")
 public class LoadingPlugin implements IFMLLoadingPlugin {
 
     @Override
