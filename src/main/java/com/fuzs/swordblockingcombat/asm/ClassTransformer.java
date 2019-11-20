@@ -14,7 +14,9 @@ import static org.objectweb.asm.Opcodes.*;
 @SuppressWarnings("unused")
 public class ClassTransformer implements IClassTransformer {
 
-    private static final String[] TRANSFORMABLE_CLASSES = {"net.minecraft.client.model.ModelBiped"};
+    private static final String[] TRANSFORMABLE_CLASSES = {
+            "net.minecraft.client.model.ModelBiped"
+    };
     private static final String[] REQUIRED_CLASSES = {
             "net.minecraft.client.model.ModelBiped",
             "net.minecraft.client.model.ModelRenderer",
