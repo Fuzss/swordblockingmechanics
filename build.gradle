@@ -37,10 +37,6 @@ minecraft {
 jar {
 
     archiveName "${mod_name.replaceAll("\\s", "")}-v${mod_version}-${mc_version}.jar" // use archiveFileName in the future
-    manifest {
-        attributes 'FMLCorePlugin': 'com.fuzs.swordblockingcombat.asm.LoadingPlugin'
-        attributes 'FMLCorePluginContainsFMLMod': 'true'
-    }
 
 }
 
