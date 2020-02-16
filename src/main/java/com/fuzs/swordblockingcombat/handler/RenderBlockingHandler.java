@@ -7,7 +7,6 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -25,7 +24,7 @@ public class RenderBlockingHandler {
 
         if (evt.getEntity() instanceof AbstractClientPlayerEntity) {
             AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) evt.getEntity();
-            if (EligibleItemHelper.isItemEligible(player.getActiveItemStack())) {
+            if (EligibleItemHelper.check(player.getActiveItemStack())) {
                 PlayerModel<AbstractClientPlayerEntity> model = evt.getRenderer().getEntityModel();
                 boolean left1 = player.getActiveHand() == Hand.OFF_HAND && player.getPrimaryHand() == HandSide.RIGHT;
                 boolean left2 = player.getActiveHand() == Hand.MAIN_HAND && player.getPrimaryHand() == HandSide.LEFT;
@@ -48,13 +47,13 @@ public class RenderBlockingHandler {
     public void onRenderSpecificHand(RenderSpecificHandEvent evt) {
 
         ItemStack stack = evt.getItemStack();
-        if (EligibleItemHelper.isItemEligible(stack)) {
+        if (EligibleItemHelper.check(stack)) {
             ClientPlayerEntity player = this.mc.player;
             if (player.isHandActive() && player.getActiveHand() == evt.getHand()) {
                 GlStateManager.pushMatrix();
                 boolean rightHanded = (evt.getHand() == Hand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand().opposite()) == HandSide.RIGHT;
                 this.transformSideFirstPerson(rightHanded ? 1.0F : -1.0F, evt.getEquipProgress());
-                this.mc.getFirstPersonRenderer().renderItemSide(player, stack, rightHanded ? ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !rightHanded);
+                this.mc.getFirstPersonRenderer().renderItemSide(player, stack, rightHanded ? net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !rightHanded);
                 GlStateManager.popMatrix();
                 evt.setCanceled(true);
             }

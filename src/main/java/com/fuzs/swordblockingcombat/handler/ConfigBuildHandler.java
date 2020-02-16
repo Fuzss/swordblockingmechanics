@@ -17,15 +17,14 @@ public class ConfigBuildHandler {
         public final ForgeConfigSpec.ConfigValue<List<String>> exclude;
         public final ForgeConfigSpec.ConfigValue<List<String>> include;
         public final ForgeConfigSpec.DoubleValue blocked;
-        public final ForgeConfigSpec.BooleanValue damageSword;
 
         private GeneralConfig(String name) {
 
             BUILDER.push(name);
 
-            this.exclude = ConfigBuildHandler.BUILDER.comment("Swords to exclude").define("Exclude", Lists.newArrayList("examplemod:exampleitem"));
-            this.include = ConfigBuildHandler.BUILDER.comment("Swords to include").define("Include", Lists.newArrayList("examplemod:exampleitem"));
-            this.blocked = ConfigBuildHandler.BUILDER.comment("Percentage blocked").defineInRange("Blocked", 0.5, 0.0, 1.0);
+            this.exclude = ConfigBuildHandler.BUILDER.comment("Swords to exclude from blocking. Intended for modded swords that already have their own right-click function. Format for every entry is \"<namespace>:<id>\".").define("Blocking Exclusion List", Lists.newArrayList());
+            this.include = ConfigBuildHandler.BUILDER.comment("Items to include for blocking. Intended for modded swords that don't extend vanilla swords. Format for every entry is \"<namespace>:<id>\".").define("Blocking Inclusion List", Lists.newArrayList());
+            this.blocked = ConfigBuildHandler.BUILDER.comment("Percentage an incoming attack will be reduced by when blocking.").defineInRange("Blocked Damage Ratio", 0.5, 0.0, 1.0);
 
             BUILDER.pop();
 

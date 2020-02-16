@@ -17,17 +17,17 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class InitiateBlockHandler {
 
-    private static ItemStack activeItemStack = ItemStack.EMPTY;
-
     @SuppressWarnings("unused")
     @SubscribeEvent
     public void onRightClickItem(PlayerInteractEvent.RightClickItem evt) {
 
-        if (EligibleItemHelper.isItemEligible(evt.getItemStack())) {
+        if (EligibleItemHelper.check(evt.getItemStack())) {
+
             PlayerEntity player = evt.getPlayer();
             ItemStack stack = player.getHeldItemOffhand();
             Item item = stack.getItem();
             if (item.getUseAction(stack) == UseAction.NONE || item.getFood() != null && !player.canEat(item.getFood().canEatWhenFull())) {
+
                 player.setActiveHand(evt.getHand());
                 evt.setCancellationResult(ActionResultType.SUCCESS);
                 evt.setCanceled(true);
@@ -40,9 +40,8 @@ public class InitiateBlockHandler {
     @SubscribeEvent
     public void onItemUseStart(LivingEntityUseItemEvent.Start evt) {
 
-        if (EligibleItemHelper.isItemEligible(evt.getItem())) {
+        if (EligibleItemHelper.check(evt.getItem())) {
             evt.setDuration(72000);
-            activeItemStack = evt.getItem();
         }
 
     }
@@ -53,38 +52,16 @@ public class InitiateBlockHandler {
 
         if (evt.getEntityLiving() instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) evt.getEntityLiving();
-            if (!evt.getSource().isUnblockable() && EligibleItemHelper.isItemEligible(player.getActiveItemStack()) && evt.getAmount() > 0.0F) {
-                float amount = (1.0F + evt.getAmount()) * ConfigBuildHandler.GENERAL_CONFIG.blocked.get().floatValue();
-                evt.setAmount(Math.min(evt.getAmount(), amount));
-            }
-        }
+            if (!evt.getSource().isUnblockable() && EligibleItemHelper.check(player.getActiveItemStack()) && evt.getAmount() > 0.0F) {
 
-    }
-
-    protected void damageShield(PlayerEntity player, float damage) {
-        final ItemStack activeItemStack = player.getActiveItemStack();
-        if (damage >= 3.0F && activeItemStack.isShield(player)) {
-            int i = 1 + MathHelper.floor(damage);
-            Hand hand = player.getActiveHand();
-            activeItemStack.damageItem(i, player, (p_213833_1_) -> {
-                p_213833_1_.sendBreakAnimation(hand);
-                net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem(player, activeItemStack, hand);
-            });
-            if (activeItemStack.isEmpty()) {
-                if (hand == Hand.MAIN_HAND) {
-                    player.setItemStackToSlot(EquipmentSlotType.MAINHAND, ItemStack.EMPTY);
-                } else {
-                    player.setItemStackToSlot(EquipmentSlotType.OFFHAND, ItemStack.EMPTY);
+                float reducedAmount = 1.0F + evt.getAmount() * (1.0F - ConfigBuildHandler.GENERAL_CONFIG.blocked.get().floatValue());
+                if (reducedAmount <= 1.0F) {
+                    reducedAmount = 0.0F;
                 }
-                // activeItemStack = ItemStack.EMPTY;
-                player.playSound(SoundEvents.ITEM_SHIELD_BREAK, 0.8F, 0.8F + player.world.rand.nextFloat() * 0.4F);
+                evt.setAmount(Math.min(evt.getAmount(), reducedAmount));
             }
         }
 
-    }
-
-    public static boolean isBlocking(PlayerEntity player) {
-        return activeItemStack == player.getActiveItemStack();
     }
 
 }
