@@ -1,56 +1,65 @@
-package com.fuzs.swordblockingcombat.handler;
+package com.fuzs.swordblockingcombat.client;
 
+import com.fuzs.swordblockingcombat.common.helper.ItemBlockingHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
+@SideOnly(Side.CLIENT)
 public class RenderBlockingHandler {
 
     private final Minecraft mc = Minecraft.getMinecraft();
 
+
     @SuppressWarnings("unused")
     @SubscribeEvent
-    public void onRenderLiving(RenderLivingEvent.Pre evt) {
+    public void onRenderLiving(final RenderLivingEvent.Pre<AbstractClientPlayer> evt) {
 
-        if (evt.getEntity() instanceof EntityPlayer) {
-            EntityPlayer player = (EntityPlayer) evt.getEntity();
-            if (player.getActiveItemStack().getItem() instanceof ItemSword) {
+        if (evt.getEntity() instanceof AbstractClientPlayer) {
+
+            AbstractClientPlayer player = (AbstractClientPlayer) evt.getEntity();
+            if (player.isHandActive() && ItemBlockingHelper.getCanStackBlock(player.getActiveItemStack())) {
+
                 ModelPlayer model = (ModelPlayer) evt.getRenderer().getMainModel();
                 boolean left1 = player.getActiveHand() == EnumHand.OFF_HAND && player.getPrimaryHand() == EnumHandSide.RIGHT;
                 boolean left2 = player.getActiveHand() == EnumHand.MAIN_HAND && player.getPrimaryHand() == EnumHandSide.LEFT;
                 if (left1 || left2) {
+
                     if (model.leftArmPose == ModelBiped.ArmPose.ITEM) {
                         model.leftArmPose = ModelBiped.ArmPose.BLOCK;
                     }
                 } else {
+
                     if (model.rightArmPose == ModelBiped.ArmPose.ITEM) {
                         model.rightArmPose = ModelBiped.ArmPose.BLOCK;
                     }
                 }
             }
         }
-
     }
 
     @SuppressWarnings("unused")
     @SubscribeEvent
-    public void renderSpecificHand(RenderSpecificHandEvent evt) {
+    public void onRenderHand(final RenderSpecificHandEvent evt) {
 
-        ItemStack stack = evt.getItemStack();
-        if (stack.getItem() instanceof ItemSword) {
-            EntityPlayerSP player = this.mc.player;
-            if (player.isHandActive() && player.getActiveHand() == evt.getHand()) {
+        EntityPlayerSP player = this.mc.player;
+        if (player != null && player.isHandActive() && player.getActiveHand() == evt.getHand()) {
+
+            ItemStack stack = evt.getItemStack();
+            if (ItemBlockingHelper.getCanStackBlock(stack)) {
+
                 GlStateManager.pushMatrix();
                 boolean rightHanded = (evt.getHand() == EnumHand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand().opposite()) == EnumHandSide.RIGHT;
                 this.transformSideFirstPerson(rightHanded ? 1.0F : -1.0F, evt.getEquipProgress());
@@ -59,9 +68,11 @@ public class RenderBlockingHandler {
                 evt.setCanceled(true);
             }
         }
-
     }
 
+    /**
+     * values taken from Minecraft snapshot 15w33b
+     */
     private void transformSideFirstPerson(float side, float equippedProg) {
 
         GlStateManager.translate(side * 0.56F, -0.52F + equippedProg * -0.6F, -0.72F);
