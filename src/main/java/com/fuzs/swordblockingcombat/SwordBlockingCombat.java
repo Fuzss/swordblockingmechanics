@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
@@ -43,6 +44,11 @@ public class SwordBlockingCombat {
     @EventHandler
     public void onPreInit(FMLPreInitializationEvent evt) {
         proxy.onPreInit();
+    }
+
+    @EventHandler
+    public void onPostInit(FMLPostInitializationEvent evt) {
+        proxy.onPostInit();
     }
 
     @EventHandler

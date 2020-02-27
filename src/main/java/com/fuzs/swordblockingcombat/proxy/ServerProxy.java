@@ -8,4 +8,9 @@ public class ServerProxy extends CommonProxy {
         super.onPreInit();
     }
 
+    @Override
+    public void onPostInit() {
+        super.onPostInit();
+    }
+
 }

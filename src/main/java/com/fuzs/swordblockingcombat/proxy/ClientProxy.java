@@ -15,4 +15,9 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(new NoCooldownHandler());
     }
 
+    @Override
+    public void onPostInit() {
+        super.onPostInit();
+    }
+
 }

@@ -14,6 +14,10 @@ public class CommonProxy {
         MinecraftForge.EVENT_BUS.register(new InitiateBlockHandler());
         MinecraftForge.EVENT_BUS.register(new ClassicCombatHandler());
         MinecraftForge.EVENT_BUS.register(new CombatFoodHandler());
+    }
+
+    public void onPostInit() {
+
         ItemBlockingHelper.sync();
     }
 
