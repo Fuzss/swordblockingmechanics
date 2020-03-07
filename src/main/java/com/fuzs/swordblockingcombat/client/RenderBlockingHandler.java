@@ -1,6 +1,7 @@
 package com.fuzs.swordblockingcombat.client;
 
-import com.fuzs.swordblockingcombat.common.helper.ItemBlockingHelper;
+import com.fuzs.swordblockingcombat.common.helper.BlockingItemHelper;
+import com.fuzs.swordblockingcombat.config.ConfigValueHolder;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -12,6 +13,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.PlayerSPPushOutOfBlocksEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -28,7 +30,7 @@ public class RenderBlockingHandler {
         if (evt.getEntity() instanceof AbstractClientPlayerEntity) {
 
             AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) evt.getEntity();
-            if (player.isHandActive() && ItemBlockingHelper.getCanStackBlock(player.getActiveItemStack())) {
+            if (BlockingItemHelper.isActiveItemStackBlocking(player)) {
 
                 PlayerModel<AbstractClientPlayerEntity> model = evt.getRenderer().getEntityModel();
                 boolean left1 = player.getActiveHand() == Hand.OFF_HAND && player.getPrimaryHand() == HandSide.RIGHT;
@@ -55,18 +57,15 @@ public class RenderBlockingHandler {
     public void onRenderSpecificHand(final RenderSpecificHandEvent evt) {
 
         ClientPlayerEntity player = this.mc.player;
-        if (player != null && player.isHandActive() && player.getActiveHand() == evt.getHand()) {
+        ItemStack stack = evt.getItemStack();
+        if (player != null && player.getActiveHand() == evt.getHand() && BlockingItemHelper.isActiveItemStackBlocking(player)) {
 
-            ItemStack stack = evt.getItemStack();
-            if (ItemBlockingHelper.getCanStackBlock(stack)) {
-
-                GlStateManager.pushMatrix();
-                boolean rightHanded = (evt.getHand() == Hand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand().opposite()) == HandSide.RIGHT;
-                this.transformSideFirstPerson(rightHanded ? 1.0F : -1.0F, evt.getEquipProgress());
-                this.mc.getFirstPersonRenderer().renderItemSide(player, stack, rightHanded ? net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !rightHanded);
-                GlStateManager.popMatrix();
-                evt.setCanceled(true);
-            }
+            GlStateManager.pushMatrix();
+            boolean rightHanded = (evt.getHand() == Hand.MAIN_HAND ? player.getPrimaryHand() : player.getPrimaryHand().opposite()) == HandSide.RIGHT;
+            this.transformSideFirstPerson(rightHanded ? 1.0F : -1.0F, evt.getEquipProgress());
+            this.mc.getFirstPersonRenderer().renderItemSide(player, stack, rightHanded ? net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !rightHanded);
+            GlStateManager.popMatrix();
+            evt.setCanceled(true);
         }
     }
 
@@ -81,6 +80,19 @@ public class RenderBlockingHandler {
         GlStateManager.rotatef(side * 13.365F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotatef(side * 78.05F, 0.0F, 0.0F, 1.0F);
 
+    }
+
+    @SuppressWarnings("unused")
+    @SubscribeEvent
+    public void onPushOutOfBlocks(final PlayerSPPushOutOfBlocksEvent evt) {
+
+        ClientPlayerEntity player = (ClientPlayerEntity) evt.getPlayer();
+        float movementModifier = ConfigValueHolder.SWORD_BLOCKING.noSlow;
+        if (movementModifier != 0.2F && !player.isPassenger() && BlockingItemHelper.isActiveItemStackBlocking(player)) {
+
+            player.movementInput.moveStrafe *= 5.0F * movementModifier;
+            player.movementInput.moveForward *= 5.0F * movementModifier;
+        }
     }
 
 }
