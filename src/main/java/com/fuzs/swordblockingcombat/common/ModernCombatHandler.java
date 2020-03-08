@@ -19,6 +19,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
@@ -33,7 +34,7 @@ public class ModernCombatHandler {
 
     public ModernCombatHandler() {
 
-        if (ConfigValueHolder.MODERN_COMBAT.dispenseTridents) {
+        if (ConfigValueHolder.COMBAT_TEST.dispenseTridents) {
 
             DispenserBlock.registerDispenseBehavior(Items.TRIDENT, new ProjectileDispenseBehavior() {
 
@@ -73,7 +74,7 @@ public class ModernCombatHandler {
             IAttributeInstance attributeInstance = ((PlayerEntity) evt.getEntity()).getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
             if (attributeInstance.getBaseValue() == 1.0) {
 
-                attributeInstance.setBaseValue(ConfigValueHolder.MODERN_COMBAT.fistStrength);
+                attributeInstance.setBaseValue(ConfigValueHolder.COMBAT_TEST.fistStrength);
             }
         }
     }
@@ -83,7 +84,7 @@ public class ModernCombatHandler {
     public void onLivingHurt(final LivingHurtEvent evt) {
 
         // immediately reset damage immunity after being hit by any projectile
-        if (evt.getSource().isProjectile() && (ConfigValueHolder.MODERN_COMBAT.noProjectileResistance ||
+        if (evt.getSource().isProjectile() && (ConfigValueHolder.COMBAT_TEST.noProjectileResistance ||
                 evt.getSource().getTrueSource() == null && evt.getAmount() == 0.0F)) {
 
             evt.getEntity().hurtResistantTime = 0;
@@ -94,7 +95,7 @@ public class ModernCombatHandler {
     @SubscribeEvent
     public void onProjectileImpact(final ProjectileImpactEvent evt) {
 
-        if (ConfigValueHolder.MODERN_COMBAT.itemProjectiles && evt.getEntity() instanceof ProjectileItemEntity) {
+        if (ConfigValueHolder.COMBAT_TEST.itemProjectiles && evt.getEntity() instanceof ProjectileItemEntity) {
 
             ProjectileItemEntity projectileItemEntity = (ProjectileItemEntity) evt.getEntity();
             if (evt.getRayTraceResult().getType() == RayTraceResult.Type.BLOCK) {
@@ -117,12 +118,28 @@ public class ModernCombatHandler {
 
     @SuppressWarnings("unused")
     @SubscribeEvent
+    public void onPlayerTick(TickEvent.PlayerTickEvent evt) {
+
+        if (ConfigValueHolder.COMBAT_TEST.fastSwitching && evt.phase == TickEvent.Phase.START) {
+
+            // switching items no longer triggers the attack cooldown
+            PlayerEntity player = evt.player;
+            ItemStack itemstack = player.getHeldItemMainhand();
+            if (!ItemStack.areItemStacksEqual(player.itemStackMainHand, itemstack)) {
+
+                player.itemStackMainHand = itemstack.copy();
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @SubscribeEvent
     public void onItemUseStart(final LivingEntityUseItemEvent.Start evt) {
 
         // remove shield activation delay
         if (evt.getItem().getItem() instanceof ShieldItem) {
 
-            evt.setDuration(evt.getItem().getUseDuration() + ConfigValueHolder.MODERN_COMBAT.shieldDelay);
+            evt.setDuration(evt.getItem().getUseDuration() + ConfigValueHolder.COMBAT_TEST.shieldDelay);
         }
     }
 
@@ -148,7 +165,7 @@ public class ModernCombatHandler {
             Item item = stack.getItem();
             if (useDuration.test(item.getUseDuration(stack))) {
 
-                Double delay = ConfigValueHolder.MODERN_COMBAT.itemDelay.get(item);
+                Double delay = ConfigValueHolder.COMBAT_TEST.itemDelay.get(item);
                 if (delay != null) {
 
                     ((PlayerEntity) entityLiving).getCooldownTracker().setCooldown(item, delay.intValue());

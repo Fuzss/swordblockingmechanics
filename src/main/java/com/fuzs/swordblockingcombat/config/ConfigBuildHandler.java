@@ -23,7 +23,6 @@ public class ConfigBuildHandler {
     static final ForgeConfigSpec.BooleanValue NO_COOLDOWN_TOOLTIP;
     static final ForgeConfigSpec.BooleanValue DISABLE_ATTACK_INDICATOR;
     static final ForgeConfigSpec.BooleanValue BOOST_SHARPNESS;
-    static final ForgeConfigSpec.BooleanValue SPRINT_WHILE_ATTACKING;
     static final ForgeConfigSpec.BooleanValue SWEEPING_REQUIRED;
     static final ForgeConfigSpec.BooleanValue NO_SWEEPING_SMOKE;
     // material changer
@@ -44,8 +43,8 @@ public class ConfigBuildHandler {
     static final ForgeConfigSpec.BooleanValue HOLD_ATTACK;
     static final ForgeConfigSpec.DoubleValue FIST_STRENGTH;
     static final ForgeConfigSpec.BooleanValue SWING_ANIMATION;
-    static final ForgeConfigSpec.BooleanValue HIT_ONLY_ALIVE;
     static final ForgeConfigSpec.BooleanValue BETTER_PROJECTILES;
+    static final ForgeConfigSpec.BooleanValue FAST_SWITCHING;
     // food buffs
     static final ForgeConfigSpec.EnumValue<ConfigValueHolder.FoodBuffs.FoodTicker> FOOD_TICKER;
     static final ForgeConfigSpec.IntValue REGEN_DELAY;
@@ -53,6 +52,13 @@ public class ConfigBuildHandler {
     static final ForgeConfigSpec.BooleanValue DRAIN_FOOD;
     static final ForgeConfigSpec.IntValue EATING_SPEED;
     static final ForgeConfigSpec.IntValue SPRINTING_LEVEL;
+    // better combat
+    static final ForgeConfigSpec.BooleanValue SPRINT_WHILE_ATTACKING;
+    static final ForgeConfigSpec.BooleanValue RETAIN_ENERGY;
+    static final ForgeConfigSpec.BooleanValue ATTACK_ONLY_FULL;
+    static final ForgeConfigSpec.BooleanValue RANDOM_CRITS;
+    static final ForgeConfigSpec.DoubleValue RANDOM_CRIT_CHANCE;
+    static final ForgeConfigSpec.BooleanValue MORE_SWEEP;
 
     static {
 
@@ -73,7 +79,6 @@ public class ConfigBuildHandler {
         NO_COOLDOWN_TOOLTIP = ConfigBuildHandler.BUILDER.comment("Remove \"Attack Speed\" attribute from tooltips.").define("No Attack Speed Tooltip", true);
         DISABLE_ATTACK_INDICATOR = ConfigBuildHandler.BUILDER.comment("Prevent attack indicator from showing regardless of what's been set in \"Video Settings\".").define("Disable Attack Indicator", true);
         BOOST_SHARPNESS = ConfigBuildHandler.BUILDER.comment("Boost sharpness enchantment to add +1.0 attack damage per level instead of +0.5 damage.").define("Boost Sharpness", true);
-        SPRINT_WHILE_ATTACKING = ConfigBuildHandler.BUILDER.comment("Don't automatically stop sprinting when attacking.").define("Sprint While Attacking", true);
         SWEEPING_REQUIRED = ConfigBuildHandler.BUILDER.comment("Is the sweeping edge enchantment required to perform a sweep attack.").define("Require Sweeping Edge", true);
         NO_SWEEPING_SMOKE = ConfigBuildHandler.BUILDER.comment("Prevent particles created by a sweep attack from appearing.").define("No Sweeping Particles", false);
         BUILDER.pop();
@@ -86,8 +91,8 @@ public class ConfigBuildHandler {
         TOOL_DURABILITY = ConfigBuildHandler.BUILDER.comment("Change the durability for any tool. Setting it to 0 will make the tool unbreakable. Format for every entry is \"<namespace>:<id>,<value>\".").define("Tool Durability List", Lists.newArrayList());
         BUILDER.pop();
 
-        BUILDER.comment("Introduces various changes from current combat snapshots.");
-        BUILDER.push("modern_combat");
+        BUILDER.comment("Introduces various changes from combat test snapshots.");
+        BUILDER.push("combat_test");
         NO_PROJECTILE_RESISTANCE = ConfigBuildHandler.BUILDER.comment("Disables the default 0.5 second damage immunity when hit by a projectile. This makes it possible for entities to be hit by multiple projectiles at once, e. g. from a multishot enchanted crossbow.").define("No Projectile Immunity", true);
         NO_AXE_ATTACK_PENALTY = ConfigBuildHandler.BUILDER.comment("Only damages axes by 1 durability instead of 2 when attacking so they properly be used as weapons.").define("No Axe Attack Penalty", true);
         ITEM_DELAY = ConfigBuildHandler.BUILDER.comment("Items to add a delay in ticks to after using. Doesn't override a delay an item has by default.").define("Item Delay List", Lists.newArrayList("minecraft:snowball,4", "minecraft:egg,4"));
@@ -100,8 +105,8 @@ public class ConfigBuildHandler {
         HOLD_ATTACK = ConfigBuildHandler.BUILDER.comment("Hold down the attack key to attack automatically whenever possible.").define("Hold Attack Button", false);
         FIST_STRENGTH = ConfigBuildHandler.BUILDER.comment("Base attack damage of the player. Attack strength of weapons and tools is added on top.").defineInRange("Fist Attack Strength", 1.0, 0.0, 2048.0);
         SWING_ANIMATION = ConfigBuildHandler.BUILDER.comment("Improved arm swing animation to emphasize the rhythm of the attacks.").define("Better Swing Animation", true);
-        HIT_ONLY_ALIVE = ConfigBuildHandler.BUILDER.comment("Ray tracing will no longer target entities that have already died.").define("Hit Only Alive", true);
         BETTER_PROJECTILES = ConfigBuildHandler.BUILDER.comment("Item projectiles like snowballs and ender pearls pass through blocks without a collision shape and deal knockback to players.").define("Improve Item Projectiles", true);
+        FAST_SWITCHING = ConfigBuildHandler.BUILDER.comment("The attack timer is unaffected by switching items.").define("Fast Tool Switching", true);
         BUILDER.pop();
 
         BUILDER.comment("Changes the way the player heals from food.");
@@ -112,6 +117,16 @@ public class ConfigBuildHandler {
         DRAIN_FOOD = ConfigBuildHandler.BUILDER.comment("Drain food instead of saturation when regenerating. Only applies when \"Food Ticker\" is set to \"CUSTOM\".").define("Regenerate From Food", false);
         EATING_SPEED = ConfigBuildHandler.BUILDER.comment("Amount of ticks it takes to consume a food item. Vanilla default is 32.").defineInRange("Eating Speed", 40, 0, 72000);
         SPRINTING_LEVEL = ConfigBuildHandler.BUILDER.comment("Food level from which on sprinting is disabled. Set to \"-1\" to always allow sprinting.").defineInRange("Sprinting Level", -1, -1, 20);
+        BUILDER.pop();
+
+        BUILDER.comment("Notable features from the outdated Better Combat.");
+        BUILDER.push("better_combat");
+        SPRINT_WHILE_ATTACKING = ConfigBuildHandler.BUILDER.comment("Don't automatically stop sprinting when attacking.").define("Sprint While Attacking", true);
+        RETAIN_ENERGY = ConfigBuildHandler.BUILDER.comment("Melee attacks that don't hit a target won't trigger the attack cooldown.").define("Retain Energy On Miss", true);
+        ATTACK_ONLY_FULL = ConfigBuildHandler.BUILDER.comment("Disable attacking when the attack cooldown is still active.").define("Attack Only When Full", false);
+        RANDOM_CRITS = ConfigBuildHandler.BUILDER.comment("Melee attacks landing a critically hit is now random and can no longer be forced by jumping.").define("Random Crits", false);
+        RANDOM_CRIT_CHANCE = ConfigBuildHandler.BUILDER.comment("Chance for a critical hit to occur when \"Random Crits\" is enabled.").defineInRange("Random Crits Chance", 0.3, 0.0, 1.0);
+        MORE_SWEEP = ConfigBuildHandler.BUILDER.comment("Every item will trigger the sword swipe animation after attacking successfully without causing areal damage though.").define("More Sweep", false);
         BUILDER.pop();
     }
 

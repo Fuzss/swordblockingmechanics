@@ -38,20 +38,10 @@ public class ClassicCombatHandler {
         return 0;
     }
 
-    public static void restoreSprinting(PlayerEntity player, int knockback) {
-
-        // knockback modifier will have changed +1 if the player was sprinting originally, therefor we now reset the sprinting flag
-        // it's possible that if there's still an attack cooldown left +1 wasn't added and sprinting won't be restored,
-        // but this is what classic combat is here to disable in the first place
-        if (EnchantmentHelper.getKnockbackModifier(player) < knockback) {
-
-            player.setSprinting(true);
-        }
-    }
-
     public static void doSweeping(boolean flag, PlayerEntity player, Entity targetEntity, float damage) {
 
-        if (flag && (!ConfigValueHolder.CLASSIC_COMBAT.sweepingRequired || EnchantmentHelper.getSweepingDamageRatio(player) > 0)) {
+        flag = flag && (!ConfigValueHolder.CLASSIC_COMBAT.sweepingRequired || EnchantmentHelper.getSweepingDamageRatio(player) > 0);
+        if (flag) {
 
             float f3 = 1.0F + EnchantmentHelper.getSweepingDamageRatio(player) * damage;
             for (LivingEntity livingentity : player.world.getEntitiesWithinAABB(LivingEntity.class, targetEntity.getBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
@@ -62,9 +52,12 @@ public class ClassicCombatHandler {
                     livingentity.attackEntityFrom(DamageSource.causePlayerDamage(player), f3);
                 }
             }
+        }
+
+        if (flag || ConfigValueHolder.BETTER_COMBAT.moreSweep) {
 
             player.world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, player.getSoundCategory(), 1.0F, 1.0F);
-            if (!ConfigValueHolder.CLASSIC_COMBAT.noSweepingSmoke) {
+            if (!ConfigValueHolder.CLASSIC_COMBAT.noSweepingSmoke || !flag) {
 
                 player.spawnSweepParticles();
             }

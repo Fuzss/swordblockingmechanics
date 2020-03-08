@@ -11,8 +11,9 @@ public class ConfigValueHolder {
     public static final SwordBlocking SWORD_BLOCKING = new SwordBlocking();
     public static final ClassicCombat CLASSIC_COMBAT = new ClassicCombat();
     public static final MaterialChanger MATERIAL_CHANGER = new MaterialChanger();
-    public static final ModernCombat MODERN_COMBAT = new ModernCombat();
+    public static final CombatTest COMBAT_TEST = new CombatTest();
     public static final FoodBuffs FOOD_BUFFS = new FoodBuffs();
+    public static final BetterCombat BETTER_COMBAT = new BetterCombat();
 
     public static class SwordBlocking {
 
@@ -31,7 +32,6 @@ public class ConfigValueHolder {
         public boolean noTooltip;
         public boolean hideIndicator;
         public boolean boostSharpness;
-        public boolean attackingAllowsSprinting;
         public boolean sweepingRequired;
         public boolean noSweepingSmoke;
     }
@@ -41,10 +41,10 @@ public class ConfigValueHolder {
         public Map<Item, Map<String, AttributeModifier>> attributes;
     }
 
-    public static class ModernCombat {
+    public static class CombatTest {
 
         public boolean noProjectileResistance;
-        public boolean noAttackPenalty;
+        public boolean noAxePenalty;
         public Map<Item, Double> itemDelay;
         public int shieldDelay;
         public boolean boostImpaling;
@@ -55,8 +55,8 @@ public class ConfigValueHolder {
         public boolean holdAttack;
         public double fistStrength;
         public boolean swingAnimation;
-        public boolean attackAlive;
         public boolean itemProjectiles;
+        public boolean fastSwitching;
     }
 
     public static class FoodBuffs {
@@ -82,6 +82,16 @@ public class ConfigValueHolder {
                 return this.id;
             }
         }
+    }
+
+    public static class BetterCombat {
+
+        public boolean attackingAllowsSprinting;
+        public boolean retainEnergy;
+        public boolean attackOnlyFull;
+        public boolean randomCrits;
+        public double critChance;
+        public boolean moreSweep;
     }
 
 }

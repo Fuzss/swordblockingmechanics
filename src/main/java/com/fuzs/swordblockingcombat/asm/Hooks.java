@@ -1,6 +1,7 @@
 package com.fuzs.swordblockingcombat.asm;
 
 import com.fuzs.swordblockingcombat.client.GrassSwingHandler;
+import com.fuzs.swordblockingcombat.common.RandomCritsHandler;
 import com.fuzs.swordblockingcombat.common.ClassicCombatHandler;
 import com.fuzs.swordblockingcombat.common.ModernCombatHandler;
 import com.fuzs.swordblockingcombat.config.ConfigValueHolder;
@@ -20,7 +21,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +34,7 @@ public class Hooks {
      */
     public static int hitEntityAmount(ToolItem toolItem) {
 
-        return ConfigValueHolder.MODERN_COMBAT.noAttackPenalty && toolItem instanceof AxeItem ? 1 : 2;
+        return ConfigValueHolder.COMBAT_TEST.noAxePenalty && toolItem instanceof AxeItem ? 1 : 2;
     }
 
     /**
@@ -51,9 +51,9 @@ public class Hooks {
      */
     public static void restoreSprinting(PlayerEntity player, int knockback) {
 
-        if (ConfigValueHolder.CLASSIC_COMBAT.attackingAllowsSprinting) {
+        if (ConfigValueHolder.BETTER_COMBAT.attackingAllowsSprinting) {
 
-            ClassicCombatHandler.restoreSprinting(player, knockback);
+            RandomCritsHandler.restoreSprinting(player, knockback);
         }
     }
 
@@ -97,7 +97,7 @@ public class Hooks {
             damage += ClassicCombatHandler.addEnchantmentDamage(player);
         }
 
-        if (ConfigValueHolder.MODERN_COMBAT.boostImpaling) {
+        if (ConfigValueHolder.COMBAT_TEST.boostImpaling) {
 
             damage += ModernCombatHandler.addEnchantmentDamage(player, targetEntity);
         }
@@ -131,7 +131,7 @@ public class Hooks {
     @OnlyIn(Dist.CLIENT)
     public static double rayTraceCollidingBlocks(float partialTicks, Entity entity, double d0, double d1) {
 
-        return ConfigValueHolder.MODERN_COMBAT.swingThroughGrass ? GrassSwingHandler.rayTraceCollidingBlocks(partialTicks, entity, d0) : d1;
+        return ConfigValueHolder.COMBAT_TEST.swingThroughGrass ? GrassSwingHandler.rayTraceCollidingBlocks(partialTicks, entity, d0) : d1;
     }
 
     /**
@@ -141,7 +141,7 @@ public class Hooks {
     @OnlyIn(Dist.CLIENT)
     public static void applyCoyoteTime() {
 
-        if (ConfigValueHolder.MODERN_COMBAT.coyoteTimer > 0) {
+        if (ConfigValueHolder.COMBAT_TEST.coyoteTimer > 0) {
 
             GrassSwingHandler.applyCoyoteTime();
         }
@@ -153,16 +153,7 @@ public class Hooks {
     @OnlyIn(Dist.CLIENT)
     public static float getSwingProgress(float swingProgress, LivingEntity entity, float partialTickTime) {
 
-        return ConfigValueHolder.MODERN_COMBAT.swingAnimation ? GrassSwingHandler.getSwingProgress(swingProgress, entity, partialTickTime) : swingProgress;
-    }
-
-    /**
-     * adjust entity ray tracing predicate to only match entities that are alive in {@link net.minecraft.client.renderer.GameRenderer#getMouseOver}
-     */
-    @OnlyIn(Dist.CLIENT)
-    public static Predicate<Entity> getEntityRayTraceFilter(Predicate<Entity> predicate) {
-
-        return ConfigValueHolder.MODERN_COMBAT.attackAlive ? entity -> predicate.test(entity) && entity.isAlive() : predicate;
+        return ConfigValueHolder.COMBAT_TEST.swingAnimation ? GrassSwingHandler.getSwingProgress(swingProgress, entity, partialTickTime) : swingProgress;
     }
 
 }

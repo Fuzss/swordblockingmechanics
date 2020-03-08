@@ -37,29 +37,28 @@ public class ConfigSyncManager {
         ConfigValueHolder.CLASSIC_COMBAT.noTooltip = ConfigBuildHandler.NO_COOLDOWN_TOOLTIP.get();
         ConfigValueHolder.CLASSIC_COMBAT.hideIndicator = ConfigBuildHandler.DISABLE_ATTACK_INDICATOR.get();
         ConfigValueHolder.CLASSIC_COMBAT.boostSharpness = ConfigBuildHandler.BOOST_SHARPNESS.get();
-        ConfigValueHolder.CLASSIC_COMBAT.attackingAllowsSprinting = ConfigBuildHandler.SPRINT_WHILE_ATTACKING.get();
         ConfigValueHolder.CLASSIC_COMBAT.sweepingRequired = ConfigBuildHandler.SWEEPING_REQUIRED.get();
         ConfigValueHolder.CLASSIC_COMBAT.noSweepingSmoke = ConfigBuildHandler.NO_SWEEPING_SMOKE.get();
         // material changer
         ConfigValueHolder.MATERIAL_CHANGER.attributes = this.syncAttributeMap();
         this.syncStackSize();
         this.syncDurability();
-        // modern combat
-        ConfigValueHolder.MODERN_COMBAT.noProjectileResistance = ConfigBuildHandler.NO_PROJECTILE_RESISTANCE.get();
-        ConfigValueHolder.MODERN_COMBAT.noAttackPenalty = ConfigBuildHandler.NO_AXE_ATTACK_PENALTY.get();
-        ConfigValueHolder.MODERN_COMBAT.itemDelay = this.parser.buildItemMapWithCondition(ConfigBuildHandler.ITEM_DELAY.get(),
+        // combat test
+        ConfigValueHolder.COMBAT_TEST.noProjectileResistance = ConfigBuildHandler.NO_PROJECTILE_RESISTANCE.get();
+        ConfigValueHolder.COMBAT_TEST.noAxePenalty = ConfigBuildHandler.NO_AXE_ATTACK_PENALTY.get();
+        ConfigValueHolder.COMBAT_TEST.itemDelay = this.parser.buildItemMapWithCondition(ConfigBuildHandler.ITEM_DELAY.get(),
                 (item, value) -> value >= 0.0 && value <= 72000.0, "Item delay out of bounds");
-        ConfigValueHolder.MODERN_COMBAT.shieldDelay = ConfigBuildHandler.SHIELD_DELAY.get() - 5;
-        ConfigValueHolder.MODERN_COMBAT.boostImpaling = ConfigBuildHandler.BOOST_IMPALING.get();
-        ConfigValueHolder.MODERN_COMBAT.dispenseTridents = ConfigBuildHandler.DISPENSE_TRIDENT.get();
-        ConfigValueHolder.MODERN_COMBAT.swingThroughGrass = ConfigBuildHandler.SWING_THROUGH_GRASS.get();
-        ConfigValueHolder.MODERN_COMBAT.coyoteTimer = ConfigBuildHandler.COYOTE_TIME.get();
-        ConfigValueHolder.MODERN_COMBAT.coyoteSmall = ConfigBuildHandler.COYOTE_SMALL.get();
-        ConfigValueHolder.MODERN_COMBAT.holdAttack = ConfigBuildHandler.HOLD_ATTACK.get();
-        ConfigValueHolder.MODERN_COMBAT.fistStrength = ConfigBuildHandler.FIST_STRENGTH.get();
-        ConfigValueHolder.MODERN_COMBAT.swingAnimation = ConfigBuildHandler.SWING_ANIMATION.get();
-        ConfigValueHolder.MODERN_COMBAT.attackAlive = ConfigBuildHandler.HIT_ONLY_ALIVE.get();
-        ConfigValueHolder.MODERN_COMBAT.itemProjectiles = ConfigBuildHandler.BETTER_PROJECTILES.get();
+        ConfigValueHolder.COMBAT_TEST.shieldDelay = ConfigBuildHandler.SHIELD_DELAY.get() - 5;
+        ConfigValueHolder.COMBAT_TEST.boostImpaling = ConfigBuildHandler.BOOST_IMPALING.get();
+        ConfigValueHolder.COMBAT_TEST.dispenseTridents = ConfigBuildHandler.DISPENSE_TRIDENT.get();
+        ConfigValueHolder.COMBAT_TEST.swingThroughGrass = ConfigBuildHandler.SWING_THROUGH_GRASS.get();
+        ConfigValueHolder.COMBAT_TEST.coyoteTimer = ConfigBuildHandler.COYOTE_TIME.get();
+        ConfigValueHolder.COMBAT_TEST.coyoteSmall = ConfigBuildHandler.COYOTE_SMALL.get();
+        ConfigValueHolder.COMBAT_TEST.holdAttack = ConfigBuildHandler.HOLD_ATTACK.get();
+        ConfigValueHolder.COMBAT_TEST.fistStrength = ConfigBuildHandler.FIST_STRENGTH.get();
+        ConfigValueHolder.COMBAT_TEST.swingAnimation = ConfigBuildHandler.SWING_ANIMATION.get();
+        ConfigValueHolder.COMBAT_TEST.itemProjectiles = ConfigBuildHandler.BETTER_PROJECTILES.get();
+        ConfigValueHolder.COMBAT_TEST.fastSwitching = ConfigBuildHandler.FAST_SWITCHING.get();
         // food buffs
         ConfigValueHolder.FOOD_BUFFS.foodTicker = ConfigBuildHandler.FOOD_TICKER.get();
         ConfigValueHolder.FOOD_BUFFS.regenDelay = ConfigBuildHandler.REGEN_DELAY.get();
@@ -67,6 +66,13 @@ public class ConfigSyncManager {
         ConfigValueHolder.FOOD_BUFFS.eatingSpeed = ConfigBuildHandler.EATING_SPEED.get();
         ConfigValueHolder.FOOD_BUFFS.regenThreshold = ConfigBuildHandler.REGEN_THRESHOLD.get();
         ConfigValueHolder.FOOD_BUFFS.sprintingLevel = ConfigBuildHandler.SPRINTING_LEVEL.get().floatValue();
+        // better combat
+        ConfigValueHolder.BETTER_COMBAT.attackingAllowsSprinting = ConfigBuildHandler.SPRINT_WHILE_ATTACKING.get();
+        ConfigValueHolder.BETTER_COMBAT.retainEnergy = ConfigBuildHandler.RETAIN_ENERGY.get();
+        ConfigValueHolder.BETTER_COMBAT.attackOnlyFull = ConfigBuildHandler.ATTACK_ONLY_FULL.get();
+        ConfigValueHolder.BETTER_COMBAT.randomCrits = ConfigBuildHandler.RANDOM_CRITS.get();
+        ConfigValueHolder.BETTER_COMBAT.critChance = ConfigBuildHandler.RANDOM_CRIT_CHANCE.get();
+        ConfigValueHolder.BETTER_COMBAT.moreSweep = ConfigBuildHandler.MORE_SWEEP.get();
     }
 
     private Map<Item, Map<String, AttributeModifier>> syncAttributeMap() {

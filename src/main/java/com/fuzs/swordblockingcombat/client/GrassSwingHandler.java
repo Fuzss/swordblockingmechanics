@@ -29,7 +29,7 @@ public class GrassSwingHandler {
     @SubscribeEvent
     public void onClientTick(final TickEvent.ClientTickEvent evt) {
 
-        if (ConfigValueHolder.MODERN_COMBAT.holdAttack && evt.phase == TickEvent.Phase.END) {
+        if (ConfigValueHolder.COMBAT_TEST.holdAttack && evt.phase == TickEvent.Phase.END) {
 
             if (this.leftClickCounter <= 0) {
 
@@ -73,10 +73,10 @@ public class GrassSwingHandler {
 
             Entity entity = ((EntityRayTraceResult) mc.objectMouseOver).getEntity();
             EntitySize size = entity.getSize(entity.getPose());
-            if ((!ConfigValueHolder.MODERN_COMBAT.coyoteSmall || size.width * size.width * size.height < 1.0F) && entity.isAlive()) {
+            if ((!ConfigValueHolder.COMBAT_TEST.coyoteSmall || size.width * size.width * size.height < 1.0F) && entity.isAlive()) {
 
                 objectMouseOver = (EntityRayTraceResult) mc.objectMouseOver;
-                objectMouseOverTimer = ConfigValueHolder.MODERN_COMBAT.coyoteTimer;
+                objectMouseOverTimer = ConfigValueHolder.COMBAT_TEST.coyoteTimer;
                 pointedEntity = mc.pointedEntity;
             }
         } else if (objectMouseOverTimer > 0 && objectMouseOver.getEntity().isAlive()) {

@@ -234,19 +234,9 @@ function patchGameRendererGetMouseOver(method, obfuscated) {
         if (node instanceof InsnNode && node.getOpcode().equals(Opcodes.RETURN)) {
             foundNode2 = node;
         }
-        if (node instanceof InvokeDynamicInsnNode && node.name.equals("test") && node.desc.equals("()Ljava/util/function/Predicate;")) {
-            var nextNode3 = node.getNext();
-            if (nextNode3 instanceof VarInsnNode && nextNode3.getOpcode().equals(Opcodes.DLOAD) && nextNode3.var.equals(8)) {
-                nextNode3 = nextNode3.getNext();
-                if (nextNode3 instanceof MethodInsnNode && nextNode3.getOpcode().equals(Opcodes.INVOKESTATIC) && nextNode3.owner.equals("net/minecraft/entity/projectile/ProjectileHelper") && nextNode3.name.equals(rayTraceEntities) && nextNode3.desc.equals("(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/AxisAlignedBB;Ljava/util/function/Predicate;D)Lnet/minecraft/util/math/EntityRayTraceResult;")) {
-                    foundNode3 = node;
-                }
-            }
-        }
     }
     var patched1 = false;
     var patched2 = false;
-    var patched3 = false;
     if (foundNode1 != null) {
         var insnList1 = new InsnList();
         insnList1.add(new VarInsnNode(Opcodes.FLOAD, 1));
@@ -264,13 +254,7 @@ function patchGameRendererGetMouseOver(method, obfuscated) {
         method.instructions.insertBefore(foundNode2, insnList2);
         patched2 = true;
     }
-    if (foundNode3 != null) {
-        var insnList3 = new InsnList();
-        insnList3.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/fuzs/swordblockingcombat/asm/Hooks", "getEntityRayTraceFilter", "(Ljava/util/function/Predicate;)Ljava/util/function/Predicate;", false));
-        method.instructions.insert(foundNode3, insnList3);
-        patched3 = true;
-    }
-    return patched1 && patched2 && patched3;
+    return patched1 && patched2;
 }
 
 function patchClientPlayerEntityLivingTick(method, obfuscated) {
