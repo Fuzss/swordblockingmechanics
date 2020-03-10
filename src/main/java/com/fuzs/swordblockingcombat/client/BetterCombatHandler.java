@@ -12,8 +12,11 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.client.event.FOVUpdateEvent;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -34,6 +37,7 @@ public class BetterCombatHandler {
 
                 // cancel attack when attack cooldown is not completely recharged
                 if (ConfigValueHolder.BETTER_COMBAT.attackOnlyFull && this.mc.player.getCooledAttackStrength(0.5F) < 1.0F) {
+
                     evt.setSwingHand(false);
                     evt.setCanceled(true);
                     return;
@@ -68,15 +72,27 @@ public class BetterCombatHandler {
 
     // =========== TESTING START ==============//
 
+    private boolean wasButtonPressed;
     private boolean prematureAttempt;
     private boolean anotherAttempt;
-    private int i = 0;
+
+    @SuppressWarnings("unused")
+    @SubscribeEvent
+    public void on(InputEvent.MouseInputEvent evt) {
+
+        // left click start
+        if (evt.getButton() == 1) {
+
+            this.wasButtonPressed = evt.getAction() == 1;
+        }
+    }
 
     @SuppressWarnings("unused")
     @SubscribeEvent
     public void on(InputEvent.ClickInputEvent evt) {
 
         if (evt.isUseItem() && evt.getHand() == Hand.OFF_HAND) {
+
             prematureAttempt = true;
         }
     }
@@ -85,20 +101,35 @@ public class BetterCombatHandler {
     @SubscribeEvent
     public void on(FOVUpdateEvent evt) {
 
+        if (this.mc.player != null && this.mc.player.isHandActive()) {
+
+            return;
+        }
+
         FirstPersonRenderer firstPersonRenderer = this.mc.getFirstPersonRenderer();
-        if (this.prematureAttempt && firstPersonRenderer.equippedProgressOffHand != 0) {
-            this.prematureAttempt = false;
+        if (this.wasButtonPressed && this.prematureAttempt && firstPersonRenderer.equippedProgressOffHand != 0) {
+
+            // turn off again
+            this.prematureAttempt = this.wasButtonPressed = false;
+
+            // switch items
             ItemStack itemstack = this.mc.player.getHeldItem(Hand.OFF_HAND);
             this.mc.player.setHeldItem(Hand.OFF_HAND, this.mc.player.getHeldItem(Hand.MAIN_HAND));
             this.mc.player.setHeldItem(Hand.MAIN_HAND, itemstack);
             this.mc.getConnection().sendPacket(new CPlayerDiggingPacket(CPlayerDiggingPacket.Action.SWAP_HELD_ITEMS, BlockPos.ZERO, Direction.DOWN));
+
+            // do actual work
             this.anotherAttempt = true;
             this.mc.clickMouse();
             this.anotherAttempt = false;
+
+            // switch items back
             ItemStack itemstack2 = this.mc.player.getHeldItem(Hand.OFF_HAND);
             this.mc.player.setHeldItem(Hand.OFF_HAND, this.mc.player.getHeldItem(Hand.MAIN_HAND));
             this.mc.player.setHeldItem(Hand.MAIN_HAND, itemstack2);
             this.mc.getConnection().sendPacket(new CPlayerDiggingPacket(CPlayerDiggingPacket.Action.SWAP_HELD_ITEMS, BlockPos.ZERO, Direction.DOWN));
+
+            // swing arm
             this.mc.player.swingArm(Hand.OFF_HAND);
         }
     }

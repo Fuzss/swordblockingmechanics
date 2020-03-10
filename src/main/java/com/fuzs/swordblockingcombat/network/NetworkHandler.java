@@ -11,7 +11,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 @SuppressWarnings("unused")
-public class NetworkHandler {
+public final class NetworkHandler {
 
     private static final NetworkHandler INSTANCE = new NetworkHandler();
     private final String PROTOCOL_VERSION = Integer.toString(1);
@@ -19,6 +19,9 @@ public class NetworkHandler {
             () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
     private int discriminator;
+
+    private NetworkHandler() {
+    }
 
     public void init() {
 
@@ -41,17 +44,17 @@ public class NetworkHandler {
         });
     }
 
-    public void sendToServer(IMessage message) {
+    public void sendToServer(final IMessage message) {
 
         MAIN_CHANNEL.sendToServer(message);
     }
 
-    public void sendTo(IMessage message, ServerPlayerEntity player) {
+    public void sendTo(final IMessage message, ServerPlayerEntity player) {
 
         MAIN_CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), message);
     }
 
-    public void sendToAll(IMessage message) {
+    public void sendToAll(final IMessage message) {
 
         MAIN_CHANNEL.send(PacketDistributor.ALL.noArg(), message);
     }

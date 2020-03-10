@@ -32,7 +32,7 @@ public class SimpleSwingMessage implements IMessage {
     @Override
     public SimpleSwingMessage readPacketData(final PacketBuffer buf) {
 
-        this.hand = Hand.values()[buf.readUnsignedByte()];
+        this.hand = Hand.values()[buf.readByte()];
         return this;
     }
 
