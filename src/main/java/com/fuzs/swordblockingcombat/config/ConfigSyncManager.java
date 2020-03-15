@@ -59,6 +59,7 @@ public class ConfigSyncManager {
         ConfigValueHolder.COMBAT_TEST.swingAnimation = ConfigBuildHandler.SWING_ANIMATION.get();
         ConfigValueHolder.COMBAT_TEST.itemProjectiles = ConfigBuildHandler.BETTER_PROJECTILES.get();
         ConfigValueHolder.COMBAT_TEST.fastSwitching = ConfigBuildHandler.FAST_SWITCHING.get();
+        ConfigValueHolder.COMBAT_TEST.upwardsKnockback = ConfigBuildHandler.UPWARDS_KNOCKBACK.get();
         // food buffs
         ConfigValueHolder.FOOD_BUFFS.foodTicker = ConfigBuildHandler.FOOD_TICKER.get();
         ConfigValueHolder.FOOD_BUFFS.regenDelay = ConfigBuildHandler.REGEN_DELAY.get();

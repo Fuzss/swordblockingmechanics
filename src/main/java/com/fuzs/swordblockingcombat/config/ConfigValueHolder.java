@@ -57,6 +57,7 @@ public class ConfigValueHolder {
         public boolean swingAnimation;
         public boolean itemProjectiles;
         public boolean fastSwitching;
+        public boolean upwardsKnockback;
     }
 
     public static class FoodBuffs {

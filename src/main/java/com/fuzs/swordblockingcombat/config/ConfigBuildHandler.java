@@ -45,6 +45,7 @@ public class ConfigBuildHandler {
     static final ForgeConfigSpec.BooleanValue SWING_ANIMATION;
     static final ForgeConfigSpec.BooleanValue BETTER_PROJECTILES;
     static final ForgeConfigSpec.BooleanValue FAST_SWITCHING;
+    static final ForgeConfigSpec.BooleanValue UPWARDS_KNOCKBACK;
     // food buffs
     static final ForgeConfigSpec.EnumValue<ConfigValueHolder.FoodBuffs.FoodTicker> FOOD_TICKER;
     static final ForgeConfigSpec.IntValue REGEN_DELAY;
@@ -107,6 +108,7 @@ public class ConfigBuildHandler {
         SWING_ANIMATION = ConfigBuildHandler.BUILDER.comment("Improved arm swing animation to emphasize the rhythm of the attacks.").define("Better Swing Animation", true);
         BETTER_PROJECTILES = ConfigBuildHandler.BUILDER.comment("Item projectiles like snowballs and ender pearls pass through blocks without a collision shape and deal knockback to players.").define("Improve Item Projectiles", true);
         FAST_SWITCHING = ConfigBuildHandler.BUILDER.comment("The attack timer is unaffected by switching items.").define("Fast Tool Switching", true);
+        UPWARDS_KNOCKBACK = ConfigBuildHandler.BUILDER.comment("Turns knockback resistance into a scale instead of being random and makes knockback have an upwards tendency.").define("Upwards Knockback", false);
         BUILDER.pop();
 
         BUILDER.comment("Changes the way the player heals from food.");

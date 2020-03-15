@@ -14,16 +14,14 @@ import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.entity.projectile.TridentEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -130,6 +128,31 @@ public class ModernCombatHandler {
                 player.itemStackMainHand = itemstack.copy();
             }
         }
+    }
+
+    @SuppressWarnings("unused")
+    @SubscribeEvent
+    public void onLivingKnockBack(final LivingKnockBackEvent evt) {
+
+        if (!ConfigValueHolder.COMBAT_TEST.upwardsKnockback) {
+
+            return;
+        }
+
+        LivingEntity entity = evt.getEntityLiving();
+        float strength = evt.getOriginalStrength();
+        // makes knockback resistance a scale instead of being random
+        strength = (float)(strength * (1.0 - entity.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue()));
+        if (strength > 0.0F) {
+
+            entity.isAirBorne = true;
+            Vec3d vec3d = entity.getMotion();
+            Vec3d vec3d1 = (new Vec3d(evt.getOriginalRatioX(), 0.0, evt.getOriginalRatioZ())).normalize().scale(strength);
+            // upwards knockback
+            entity.setMotion(vec3d.x / 2.0 - vec3d1.x, entity.onGround ? Math.min(0.4, strength) : Math.max(0.4, vec3d.y + strength / 2.0F), vec3d.z / 2.0 - vec3d1.z);
+        }
+
+        evt.setCanceled(true);
     }
 
     @SuppressWarnings("unused")
