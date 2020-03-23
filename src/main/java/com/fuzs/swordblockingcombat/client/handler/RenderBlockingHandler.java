@@ -1,4 +1,4 @@
-package com.fuzs.swordblockingcombat.client;
+package com.fuzs.swordblockingcombat.client.handler;
 
 import com.fuzs.swordblockingcombat.common.helper.ItemBlockingHelper;
 import net.minecraft.client.Minecraft;

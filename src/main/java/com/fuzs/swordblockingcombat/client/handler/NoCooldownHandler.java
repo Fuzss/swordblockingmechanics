@@ -1,6 +1,6 @@
-package com.fuzs.swordblockingcombat.client;
+package com.fuzs.swordblockingcombat.client.handler;
 
-import com.fuzs.swordblockingcombat.util.ConfigBuildHandler;
+import com.fuzs.swordblockingcombat.config.ConfigBuildHandler;
 import com.fuzs.swordblockingcombat.util.ReflectionHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;

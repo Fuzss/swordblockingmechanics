@@ -1,10 +1,7 @@
-package com.fuzs.swordblockingcombat.util;
+package com.fuzs.swordblockingcombat.config;
 
 import com.fuzs.swordblockingcombat.SwordBlockingCombat;
-import com.google.common.collect.Lists;
 import net.minecraftforge.common.config.Config;
-
-import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 @Config(modid = SwordBlockingCombat.MODID)
@@ -17,7 +14,7 @@ public class ConfigBuildHandler {
     @Config.Comment("Restores pre-combat update combat mechanics.")
     public static ClassicCombatConfig classicCombatConfig = new ClassicCombatConfig();
     @Config.Name("food_buffs")
-    @Config.Comment("Changes the way the player heals from food.")
+    @Config.Comment({"Changes the way the player heals from food.", "Deactivates itself if \"Apple Core\" is installed."})
     public static FoodBuffsConfig foodBuffsConfig = new FoodBuffsConfig();
 
     public static class SwordBlockingConfig {

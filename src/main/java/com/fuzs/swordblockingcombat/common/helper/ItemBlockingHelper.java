@@ -1,7 +1,7 @@
 package com.fuzs.swordblockingcombat.common.helper;
 
-import com.fuzs.swordblockingcombat.util.ConfigBuildHandler;
-import com.fuzs.swordblockingcombat.util.StringListParser;
+import com.fuzs.swordblockingcombat.config.ConfigBuildHandler;
+import com.fuzs.swordblockingcombat.config.StringListParser;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;

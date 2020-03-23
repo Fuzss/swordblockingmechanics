@@ -1,7 +1,7 @@
-package com.fuzs.swordblockingcombat.common;
+package com.fuzs.swordblockingcombat.common.handler;
 
 import com.fuzs.swordblockingcombat.common.helper.ItemBlockingHelper;
-import com.fuzs.swordblockingcombat.util.ConfigBuildHandler;
+import com.fuzs.swordblockingcombat.config.ConfigBuildHandler;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.EnumAction;

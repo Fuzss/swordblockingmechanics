@@ -1,7 +1,7 @@
 package com.fuzs.swordblockingcombat.proxy;
 
-import com.fuzs.swordblockingcombat.client.NoCooldownHandler;
-import com.fuzs.swordblockingcombat.client.RenderBlockingHandler;
+import com.fuzs.swordblockingcombat.client.handler.NoCooldownHandler;
+import com.fuzs.swordblockingcombat.client.handler.RenderBlockingHandler;
 import net.minecraftforge.common.MinecraftForge;
 
 @SuppressWarnings("unused")

@@ -1,4 +1,4 @@
-package com.fuzs.swordblockingcombat.util;
+package com.fuzs.swordblockingcombat.config;
 
 import com.fuzs.swordblockingcombat.SwordBlockingCombat;
 import com.google.common.collect.Sets;
@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
+@SuppressWarnings("unused")
 public class StringListParser {
 
     private Optional<ResourceLocation> parseResourceLocation(String source) {

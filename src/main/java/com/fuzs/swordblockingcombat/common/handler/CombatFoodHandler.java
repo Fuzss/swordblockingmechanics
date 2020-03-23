@@ -1,6 +1,6 @@
-package com.fuzs.swordblockingcombat.common;
+package com.fuzs.swordblockingcombat.common.handler;
 
-import com.fuzs.swordblockingcombat.util.ConfigBuildHandler;
+import com.fuzs.swordblockingcombat.config.ConfigBuildHandler;
 import com.fuzs.swordblockingcombat.util.ReflectionHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.DamageSource;
