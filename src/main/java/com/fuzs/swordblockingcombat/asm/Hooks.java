@@ -7,9 +7,12 @@ import com.fuzs.swordblockingcombat.config.ConfigBuildHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ToolItem;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -115,6 +118,39 @@ public class Hooks {
     public static float getSwingProgress(float swingProgress, LivingEntity entity, float partialTickTime) {
 
         return ConfigBuildHandler.SWING_ANIMATION.get() ? GrassSwingHandler.getSwingProgress(swingProgress, entity, partialTickTime) : swingProgress;
+    }
+
+    /**
+     * change armor model to turn red on hit in {@link net.minecraft.client.renderer.entity.layers.ArmorLayer#shouldCombineTextures}
+     */
+    @OnlyIn(Dist.CLIENT)
+    public static boolean shouldCombineArmorLayer() {
+
+        return ConfigBuildHandler.RED_ARMOR.get();
+    }
+
+    /**
+     * make fishing bobber cause an attack when landing on a living entity in net.minecraft.entity.projectile.FishingBobberEntity#checkCollision
+     */
+    public static void onFishingBobberCollision(FishingBobberEntity bobber, PlayerEntity angler, Entity caughtEntity) {
+
+        if (ConfigBuildHandler.OLD_FISHING_ROD.get() && caughtEntity instanceof LivingEntity) {
+
+            caughtEntity.attackEntityFrom(DamageSource.causeThrownDamage(bobber, angler), 0.0F);
+        }
+    }
+
+    /**
+     * add slight upwards motion when pulling an entity in net.minecraft.entity.projectile.FishingBobberEntity#bringInHookedEntity
+     */
+    public static Vec3d getCaughtEntityMotion(Vec3d vec3d) {
+
+        if (ConfigBuildHandler.OLD_FISHING_ROD.get()) {
+
+            double x = vec3d.getX() * 10.0,  y = vec3d.getY() * 10.0, z = vec3d.getZ() * 10.0;
+            vec3d = vec3d.add(0.0, Math.pow(x * x + y * y + z * z, 0.25) * 0.08, 0.0);
+        }
+        return vec3d;
     }
 
 }
