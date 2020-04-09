@@ -3,15 +3,24 @@ package com.fuzs.swordblockingcombat.asm;
 import com.fuzs.swordblockingcombat.client.handler.GrassSwingHandler;
 import com.fuzs.swordblockingcombat.common.handler.ClassicCombatHandler;
 import com.fuzs.swordblockingcombat.common.handler.CombatTestHandler;
+import com.fuzs.swordblockingcombat.common.helper.BlockingItemHelper;
 import com.fuzs.swordblockingcombat.config.ConfigBuildHandler;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.renderer.Vector3f;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.model.ItemTransformVec3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -21,6 +30,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
  */
 @SuppressWarnings("unused")
 public class Hooks {
+
+    private static final BlockingItemHelper BLOCKING_HELPER = new BlockingItemHelper();
 
     /**
      * make attacking an entity in {@link net.minecraft.item.ToolItem} only consume one durability point
@@ -151,6 +162,53 @@ public class Hooks {
             vec3d = vec3d.add(0.0, Math.pow(x * x + y * y + z * z, 0.25) * 0.08, 0.0);
         }
         return vec3d;
+    }
+
+    public static boolean canBePushed(boolean flag, LivingEntity livingEntity) {
+
+        return flag && !(livingEntity instanceof PlayerEntity);
+    }
+
+    public static void debugModel(ItemStack stack, IBakedModel bakedmodel) {
+
+//        ItemCameraTransforms itemcameratransforms = bakedmodel.getItemCameraTransforms();
+//        ItemTransformVec3f vec3f = itemcameratransforms.getTransform(ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND);
+//        System.out.println("RRotation=" + vec3fToString(vec3f.rotation) + ", Translation=" + vec3fToString(vec3f.translation) + ", Scale=" + vec3fToString(vec3f.scale) + " for " + stack.getItem());
+//        ItemTransformVec3f vec3f2 = itemcameratransforms.getTransform(ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND);
+//        System.out.println("LRotation=" + vec3fToString(vec3f2.rotation) + ", Translation=" + vec3fToString(vec3f2.translation) + ", Scale=" + vec3fToString(vec3f2.scale) + " for " + stack.getItem());
+
+//        float f = vec3f.rotation.getX();
+//        float f1 = vec3f.rotation.getY();
+//        float f2 = vec3f.rotation.getZ();
+//        System.out.println(new Matrix4f(new Quaternion(f, f1, f2, true)));
+//        System.out.println(new Matrix4f(new Quaternion(-f2, -f, -f1, true)));
+        // 1.9+
+        // right: Rotation={x=0.0, y=-90.0, z=55.0}, Translation={x=0.0, y=0.25, z=0.03125}, Scale={x=0.85, y=0.85, z=0.85} for diamond_sword
+        // left: Rotation=(x=0.0, y=90.0, z=-55.0), Translation=(x=0.0, y=0.25, z=0.03125), Scale=(x=0.85, y=0.85, z=0.85) for diamond_sword
+        // 1.8
+        // Rotation=(0.0, 90.0, -35.0), Translation=(0.0, 0.078125, -0.21875), Scale=(0.85, 0.85, 0.85)
+    }
+
+    private static String vec3fToString(Vector3f vec) {
+        return "(" + "x=" + vec.getX() + ", " + "y=" + vec.getY() + ", " + "z=" + vec.getZ() + ")";
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void applyRotations(BipedModel<LivingEntity> model, LivingEntity entity) {
+
+        if (entity instanceof AbstractClientPlayerEntity) {
+
+            if (BLOCKING_HELPER.isActiveItemStackBlocking((PlayerEntity) entity)) {
+
+                if (entity.getActiveHand() == Hand.OFF_HAND) {
+
+                    model.bipedLeftArm.rotateAngleX = model.bipedLeftArm.rotateAngleX - ((float) Math.PI * 2.0F) / 10F;
+                } else {
+
+                    model.bipedRightArm.rotateAngleX = model.bipedRightArm.rotateAngleX - ((float) Math.PI * 2.0F) / 10F;
+                }
+            }
+        }
     }
 
 }

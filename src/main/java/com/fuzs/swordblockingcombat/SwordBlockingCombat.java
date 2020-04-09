@@ -2,6 +2,7 @@ package com.fuzs.swordblockingcombat;
 
 import com.fuzs.materialmaster.api.PropertyProviderUtils;
 import com.fuzs.swordblockingcombat.client.handler.GrassSwingHandler;
+import com.fuzs.swordblockingcombat.client.handler.HeldItemHandler;
 import com.fuzs.swordblockingcombat.client.handler.NoCooldownHandler;
 import com.fuzs.swordblockingcombat.client.handler.RenderBlockingHandler;
 import com.fuzs.swordblockingcombat.common.handler.ClassicCombatHandler;
@@ -52,6 +53,7 @@ public class SwordBlockingCombat {
 
     private void onClientSetup(final FMLClientSetupEvent evt) {
 
+        new HeldItemHandler();
         // sword blocking
         MinecraftForge.EVENT_BUS.register(new RenderBlockingHandler());
         // classic combat

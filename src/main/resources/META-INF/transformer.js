@@ -119,6 +119,11 @@ function initializeCoreMod() {
                     name: "getSwingProgress",
                     desc: "(F)F",
                     patches: [patchLivingEntityGetSwingProgress]
+                }, {
+                    obfName: "",
+                    name: "canBePushed",
+                    desc: "()Z",
+                    patches: [patchLivingEntityCanBePushed]
                 }], classNode, "LivingEntity");
                 return classNode;
             }
@@ -159,6 +164,40 @@ function initializeCoreMod() {
                     desc: "()V",
                     patches: [patchFishingBobberEntityBringInHookedEntity]
                 }], classNode, "FishingBobberEntity");
+                return classNode;
+            }
+        },
+
+        // item renderer debugging
+        'item_renderer_patch': {
+            'target': {
+                'type': 'CLASS',
+                'name': 'net.minecraft.client.renderer.ItemRenderer'
+            },
+            'transformer': function(classNode) {
+                patchMethod([{
+                    obfName: "",
+                    name: "renderItemModel",
+                    desc: "(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/renderer/model/IBakedModel;Lnet/minecraft/client/renderer/model/ItemCameraTransforms$TransformType;Z)V",
+                    patches: [patchItemRendererRenderItemModel]
+                }], classNode, "ItemRenderer");
+                return classNode;
+            }
+        },
+
+        // custom arm position
+        'biped_model_patch': {
+            'target': {
+                'type': 'CLASS',
+                'name': 'net.minecraft.client.renderer.entity.model.BipedModel'
+            },
+            'transformer': function(classNode) {
+                patchMethod([{
+                    obfName: "",
+                    name: "setRotationAngles",
+                    desc: "(Lnet/minecraft/entity/LivingEntity;FFFFFF)V",
+                    patches: [patchBipedModelSetRotationAngles]
+                }], classNode, "BipedModel");
                 return classNode;
             }
         }
@@ -220,6 +259,59 @@ function patchInstructions(method, filter, action, obfuscated) {
         return true;
     }
 }
+
+var patchBipedModelSetRotationAngles = {
+    filter: function(node, obfuscated) {
+        if (node instanceof VarInsnNode && node.getOpcode().equals(Opcodes.ALOAD) && node.var.equals(0)) {
+            var nextNode = node.getNext();
+            if (matchesField(nextNode, "net/minecraft/client/renderer/entity/model/BipedModel", obfuscated ? "" : "swingProgress", "F")) {
+                nextNode = nextNode.getNext();
+                if (nextNode instanceof InsnNode && nextNode.getOpcode().equals(Opcodes.FCONST_0)) {
+                    nextNode = nextNode.getNext();
+                    if (nextNode instanceof InsnNode && nextNode.getOpcode().equals(Opcodes.FCMPL)) {
+                        return node.getPrevious();
+                    }
+                }
+            }
+        }
+    },
+    action: function(node, instructions, obfuscated) {
+        var insnList = new InsnList();
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        insnList.add(generateHook("applyRotations", "(Lnet/minecraft/client/renderer/entity/model/BipedModel;Lnet/minecraft/entity/LivingEntity;)V"));
+        instructions.insert(node, insnList);
+    }
+};
+
+var patchItemRendererRenderItemModel = {
+    filter: function(node, obfuscated) {
+        if (matchesMethod(node, "com/mojang/blaze3d/platform/GlStateManager", "pushMatrix", "()V")) {
+            return node;
+        }
+    },
+    action: function(node, instructions, obfuscated) {
+        var insnList = new InsnList();
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 1));
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 2));
+        insnList.add(generateHook("debugModel", "(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/renderer/model/IBakedModel;)V"));
+        instructions.insert(node, insnList);
+    }
+};
+
+var patchLivingEntityCanBePushed = {
+    filter: function(node, obfuscated) {
+        if (node instanceof InsnNode && node.getOpcode().equals(Opcodes.IRETURN)) {
+            return node.getPrevious();
+        }
+    },
+    action: function(node, instructions, obfuscated) {
+        var insnList = new InsnList();
+        insnList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        insnList.add(generateHook("canBePushed", "(ZLnet/minecraft/entity/LivingEntity;)Z"));
+        instructions.insert(node, insnList);
+    }
+};
 
 var patchFishingBobberEntityBringInHookedEntity = {
     filter: function(node, obfuscated) {
