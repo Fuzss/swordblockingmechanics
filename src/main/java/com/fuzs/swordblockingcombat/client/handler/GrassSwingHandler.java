@@ -3,6 +3,7 @@ package com.fuzs.swordblockingcombat.client.handler;
 import com.fuzs.swordblockingcombat.SwordBlockingCombat;
 import com.fuzs.swordblockingcombat.config.ConfigBuildHandler;
 import com.fuzs.swordblockingcombat.config.ConfigBuildHandler.AttackIndicator;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
@@ -12,7 +13,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.UseAction;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -27,25 +30,43 @@ import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import java.util.Set;
+
 @OnlyIn(Dist.CLIENT)
 public class GrassSwingHandler {
 
     private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation(SwordBlockingCombat.MODID, "textures/gui/icons.png");
 
-    private final Minecraft mc = Minecraft.getInstance();
-    private int leftClickCounter;
-    private AttackIndicatorStatus attackIndicator = AttackIndicatorStatus.OFF;
+//    @SyncProvider(path = {"combat_test", "Hide Offhand"})
+    public static Set<Item> hiddenItems = Sets.newHashSet();
 
     private static int objectMouseOverTimer;
     private static EntityRayTraceResult objectMouseOver;
     private static Entity pointedEntity;
 
+    private final Minecraft mc = Minecraft.getInstance();
+    private int leftClickCounter;
+    private AttackIndicatorStatus attackIndicator = AttackIndicatorStatus.OFF;
+    private Item activeItem = Items.AIR;
+    private boolean hide;
+
     @SuppressWarnings("unused")
     @SubscribeEvent
     public void onRenderHand(final RenderSpecificHandEvent evt) {
 
-        if (ConfigBuildHandler.HIDE_SHIELD.get() && this.mc.player != null && evt.getHand().equals(this.mc.player.getActiveHand())
-                && this.mc.player.getActiveItemStack().getUseAction() == UseAction.BLOCK) {
+        if (evt.getHand() != Hand.OFF_HAND) {
+
+            return;
+        }
+
+        Item item = evt.getItemStack().getItem();
+        if (item != this.activeItem) {
+
+            this.activeItem = item;
+            this.hide = hiddenItems.contains(item);
+        }
+
+        if (this.hide) {
 
             evt.setCanceled(true);
         }
@@ -84,8 +105,8 @@ public class GrassSwingHandler {
                     int width = this.mc.mainWindow.getScaledWidth() / 2 - 8;
                     int height = this.mc.mainWindow.getScaledHeight() / 2 - 7 + 16;
                     // rendering on top of each other for transparency reasons
-                    AbstractGui.blit(width, height, 36, 0, 16, 14, 256, 256);
-                    AbstractGui.blit(width, height, 52, 0, 16, 14, 256, 256);
+                    AbstractGui.blit(width, height, 54, 0, 16, 14, 256, 256);
+                    AbstractGui.blit(width, height, 70, 0, 16, 14, 256, 256);
                 }
             }
         }
