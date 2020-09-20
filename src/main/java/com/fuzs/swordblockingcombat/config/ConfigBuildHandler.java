@@ -50,6 +50,9 @@ public class ConfigBuildHandler {
         @Config.Name("Require Sweeping Edge")
         @Config.Comment("Is the sweeping edge enchantment required to perform a sweep attack.")
         public boolean sweepingRequired = true;
+        @Config.Name("Linear Knockback")
+        @Config.Comment("Turns knockback resistance into a scale instead of being random.")
+        public boolean linearKnockback = true;
 
     }
 

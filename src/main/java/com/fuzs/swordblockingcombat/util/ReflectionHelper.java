@@ -2,10 +2,15 @@ package com.fuzs.swordblockingcombat.util;
 
 import com.fuzs.swordblockingcombat.SwordBlockingCombat;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.entity.RenderLivingBase;
+import net.minecraft.client.renderer.entity.RenderPlayer;
+import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.FoodStats;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+
+import java.util.List;
 
 public class ReflectionHelper {
 
@@ -13,6 +18,7 @@ public class ReflectionHelper {
     private static final String ITEM_RENDERER_PREV_EQUIPPED_PROGRESS_MAIN_HAND = "field_187470_g";
     private static final String ITEM_RENDERER_EQUIPPED_PROGRESS_OFF_HAND = "field_187471_h";
     private static final String ITEM_RENDERER_PREV_EQUIPPED_PROGRESS_OFF_HAND = "field_187472_i";
+    private static final String RENDER_LIVING_BASE_LAYER_RENDERERS = "field_177097_h";
     private static final String ENTITY_LIVING_BASE_TICKS_SINCE_LAST_SWING = "field_184617_aD";
     private static final String ENTITY_PLAYER_FOOD_STATS = "field_71100_bB";
     private static final String FOOD_STATS_FOOD_LEVEL = "field_75127_a";
@@ -36,6 +42,10 @@ public class ReflectionHelper {
 
     public static float getPrevEquippedProgressOffHand(ItemRenderer instance) {
         return (float) getPrivateValue(ItemRenderer.class, instance, ITEM_RENDERER_PREV_EQUIPPED_PROGRESS_OFF_HAND);
+    }
+
+    public static List<LayerRenderer<EntityLivingBase>> getLayerRenderers(RenderPlayer instance) {
+        return (List<LayerRenderer<EntityLivingBase>>) getPrivateValue(RenderLivingBase.class, instance, RENDER_LIVING_BASE_LAYER_RENDERERS);
     }
 
     public static FoodStats getFoodStats(EntityPlayer instance) {

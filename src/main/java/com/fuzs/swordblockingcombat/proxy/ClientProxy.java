@@ -1,5 +1,6 @@
 package com.fuzs.swordblockingcombat.proxy;
 
+import com.fuzs.swordblockingcombat.client.handler.HeldItemHandler;
 import com.fuzs.swordblockingcombat.client.handler.NoCooldownHandler;
 import com.fuzs.swordblockingcombat.client.handler.RenderBlockingHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,7 +18,9 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void onPostInit() {
+
         super.onPostInit();
+        HeldItemHandler.replaceHeldItemLayer();
     }
 
 }

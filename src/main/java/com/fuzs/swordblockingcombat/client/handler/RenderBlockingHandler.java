@@ -22,7 +22,6 @@ public class RenderBlockingHandler {
 
     private final Minecraft mc = Minecraft.getMinecraft();
 
-
     @SuppressWarnings("unused")
     @SubscribeEvent
     public void onRenderLiving(final RenderLivingEvent.Pre<AbstractClientPlayer> evt) {
