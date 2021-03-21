@@ -1,12 +1,14 @@
-package com.fuzs.swordblockingmechanics.util;
+package com.fuzs.swordblockingmechanics.client.util;
 
 import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.AttackIndicatorStatus;
+import net.minecraft.client.settings.IteratableOption;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -18,17 +20,19 @@ public class AttackIndicatorHelper {
     private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation(SwordBlockingMechanics.MODID, "textures/gui/icons.png");
     private static final MutableInt INDICATOR_VISITORS = new MutableInt();
 
+//    private static AttackIndicatorStatus shieldIndicator = AttackIndicatorStatus.CROSSHAIR;
+//    public static final IteratableOption SHIELD_INDICATOR = new IteratableOption("options.shieldIndicator", (settings, optionValues) -> shieldIndicator = AttackIndicatorStatus.byId(shieldIndicator.getId() + optionValues), (settings, optionValues) -> new TranslationTextComponent("options.generic_value", "options.shieldIndicator", new TranslationTextComponent(shieldIndicator.getResourceKey())));
+
     private static AttackIndicatorStatus attackIndicator = AttackIndicatorStatus.OFF;
 
-    public static AttackIndicatorStatus getActiveIndicator(RenderGameOverlayEvent.ElementType elementType) {
+    public static AttackIndicatorStatus getActiveIndicator(RenderGameOverlayEvent.ElementType elementType, AttackIndicatorStatus shieldIndicator) {
 
-        Minecraft mc = Minecraft.getInstance();
-        if (elementType == RenderGameOverlayEvent.ElementType.CROSSHAIRS && (mc.gameSettings.attackIndicator == AttackIndicatorStatus.CROSSHAIR || attackIndicator == AttackIndicatorStatus.CROSSHAIR)) {
+        if (elementType == RenderGameOverlayEvent.ElementType.CROSSHAIRS && shieldIndicator == AttackIndicatorStatus.CROSSHAIR) {
 
             return AttackIndicatorStatus.CROSSHAIR;
         }
 
-        if (elementType == RenderGameOverlayEvent.ElementType.HOTBAR && (mc.gameSettings.attackIndicator == AttackIndicatorStatus.HOTBAR || attackIndicator == AttackIndicatorStatus.HOTBAR)) {
+        if (elementType == RenderGameOverlayEvent.ElementType.HOTBAR && shieldIndicator == AttackIndicatorStatus.HOTBAR) {
 
             return AttackIndicatorStatus.HOTBAR;
         }

@@ -2,12 +2,14 @@ package com.fuzs.swordblockingmechanics.client.element;
 
 import com.fuzs.puzzleslib_sbm.element.extension.ElementExtension;
 import com.fuzs.puzzleslib_sbm.element.side.IClientElement;
+import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
 import com.fuzs.swordblockingmechanics.client.renderer.entity.layers.BlockingHeldItemLayer;
+import com.fuzs.swordblockingmechanics.element.CombatTestElement;
 import com.fuzs.swordblockingmechanics.element.SwordBlockingElement;
 import com.fuzs.swordblockingmechanics.mixin.client.accessor.IFirstPersonRendererAccessor;
 import com.fuzs.swordblockingmechanics.mixin.client.accessor.IIngameGuiAccessor;
 import com.fuzs.swordblockingmechanics.mixin.client.accessor.ILivingRendererAccessor;
-import com.fuzs.swordblockingmechanics.util.AttackIndicatorHelper;
+import com.fuzs.swordblockingmechanics.client.util.AttackIndicatorHelper;
 import com.fuzs.swordblockingmechanics.util.BlockingHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.GameSettings;
@@ -116,7 +118,7 @@ public class SwordBlockingExtension extends ElementExtension<SwordBlockingElemen
                 if (!isPreRendering) {
 
                     MatrixStack matrixStack = evt.getMatrixStack();
-                    switch (AttackIndicatorHelper.getActiveIndicator(evt.getType())) {
+                    switch (AttackIndicatorHelper.getActiveIndicator(evt.getType(), ((CombatTestElement) SwordBlockingMechanics.COMBAT_TEST).extension.shieldIndicator)) {
 
                         case CROSSHAIR:
 

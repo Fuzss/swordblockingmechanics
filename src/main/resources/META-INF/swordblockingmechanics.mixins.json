@@ -12,7 +12,8 @@
     "client.BipedModelMixin",
     "client.accessor.IFirstPersonRendererAccessor",
     "client.accessor.IIngameGuiAccessor",
-    "client.accessor.ILivingRendererAccessor"
+    "client.accessor.ILivingRendererAccessor",
+    "client.accessor.IOptionSliderAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

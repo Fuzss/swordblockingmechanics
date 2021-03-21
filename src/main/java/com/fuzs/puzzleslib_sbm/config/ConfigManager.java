@@ -4,9 +4,11 @@ import com.fuzs.puzzleslib_sbm.PuzzlesLib;
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import com.fuzs.puzzleslib_sbm.element.ElementRegistry;
 import com.fuzs.puzzleslib_sbm.util.INamespaceLocator;
+import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -142,20 +144,31 @@ public class ConfigManager implements INamespaceLocator {
      * @param path individual parts of path for config value
      * @return the config value
      */
-    @Nullable
-    public Object getConfigValue(AbstractElement element, String... path) {
-
-        assert path.length != 0 : "Unable to get config value: " + "Invalid config path";
+    public <T> Optional<T> getConfigValue(AbstractElement element, String... path) {
 
         if (element.isEnabled()) {
 
-            String singlePath = Stream.concat(Stream.of(element.getRegistryName().getPath()), Stream.of(path)).collect(Collectors.joining("."));
-            return this.getConfigData(element, singlePath).
-                    <Object>map(ConfigValueData::getValue)
-                    .orElse(null);
+            return this.<ForgeConfigSpec.ConfigValue<Object>, Object, T>getConfigData(element, path)
+                    .map(ConfigValueData::getValue);
         }
 
-        return null;
+        return Optional.empty();
+    }
+
+    public Optional<String> getConfigComment(AbstractElement element, String... path) {
+
+        Optional<ConfigValueData<ForgeConfigSpec.ConfigValue<Object>, Object, Object>> optionValue = this.getConfigData(element, path);
+        if (optionValue.isPresent()) {
+
+            ConfigValueData<?, ?, ?> data = optionValue.get();
+            ConfigBuilder builder = this.getBuilder(element.getRegistryName().getNamespace());
+            if (!builder.isSpecNotBuilt(data.type)) {
+
+                return Optional.ofNullable(data.getComment(builder.getSpec(data.type)));
+            }
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -163,17 +176,19 @@ public class ConfigManager implements INamespaceLocator {
      * @param path individual parts of path for config value
      * @return config data
      */
-    private Optional<ConfigValueData<? extends ForgeConfigSpec.ConfigValue<?>, ?, ?>> getConfigData(AbstractElement element, String path) {
+    @SuppressWarnings("unchecked")
+    public <S extends ForgeConfigSpec.ConfigValue<T>, T, R> Optional<ConfigValueData<S, T, R>> getConfigData(AbstractElement element, String... path) {
 
+        String singlePath = concatConfigPath(element, path);
         for (ConfigValueData<? extends ForgeConfigSpec.ConfigValue<?>, ?, ?> data : this.configData.get(element)) {
 
-            if (data.path.equals(path)) {
+            if (data.isAtPath(singlePath)) {
 
-                return Optional.of(data);
+                return Optional.of((ConfigValueData<S, T, R>) data);
             }
         }
 
-        PuzzlesLib.LOGGER.error("Unable to get config value at path \"" + path + "\": " + "No config value found");
+        PuzzlesLib.LOGGER.error("Unable to get config value at path \"" + singlePath + "\": " + "No config value found");
         return Optional.empty();
     }
 
@@ -251,11 +266,12 @@ public class ConfigManager implements INamespaceLocator {
      */
     public <S extends ForgeConfigSpec.ConfigValue<T>, T, R> void registerEntry(S entry, Consumer<R> action, Function<T, R> transformer) {
 
-        Pair<AbstractElement, ModConfig.Type> activeTuple = this.getBuilder().getActiveTuple();
+        ConfigBuilder builder = this.getBuilder();
+        Pair<AbstractElement, ModConfig.Type> activeTuple = builder.getActiveTuple();
         if (activeTuple == null) {
 
             PuzzlesLib.LOGGER.error("Unable to register config entry: " + "Active builder is null");
-        } else if (this.getBuilder().isSpecNotBuilt(activeTuple.getRight())) {
+        } else if (builder.isSpecNotBuilt(activeTuple.getRight())) {
 
             this.configData.put(activeTuple.getLeft(), new ConfigValueData<>(entry, activeTuple.getRight(), action, transformer));
         } else {
@@ -308,6 +324,18 @@ public class ConfigManager implements INamespaceLocator {
                 .filter(Objects::nonNull)
                 .map(ResourceLocation::toString)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * @param element element this option belongs to
+     * @param path path inside element
+     * @return full qualified path
+     */
+    public static String concatConfigPath(AbstractElement element, String... path) {
+
+        assert path.length != 0 : "Unable to get config value: " + "Invalid config path";
+
+        return Stream.concat(Stream.of(element.getRegistryName().getPath()), Stream.of(path)).collect(Collectors.joining("."));
     }
 
     /**

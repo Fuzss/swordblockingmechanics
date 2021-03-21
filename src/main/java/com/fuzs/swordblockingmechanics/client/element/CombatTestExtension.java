@@ -1,17 +1,22 @@
 package com.fuzs.swordblockingmechanics.client.element;
 
+import com.fuzs.puzzleslib_sbm.client.util.GameOptionsHelper;
 import com.fuzs.puzzleslib_sbm.element.extension.ElementExtension;
 import com.fuzs.puzzleslib_sbm.element.side.IClientElement;
 import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
 import com.fuzs.swordblockingmechanics.element.CombatTestElement;
 import com.fuzs.swordblockingmechanics.mixin.client.accessor.IIngameGuiAccessor;
-import com.fuzs.swordblockingmechanics.util.AttackIndicatorHelper;
+import com.fuzs.swordblockingmechanics.client.util.AttackIndicatorHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.screen.VideoSettingsScreen;
+import net.minecraft.client.settings.AttackIndicatorStatus;
+import net.minecraft.client.settings.IteratableOption;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameType;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -20,8 +25,9 @@ import net.minecraftforge.eventbus.api.EventPriority;
 public class CombatTestExtension extends ElementExtension<CombatTestElement> implements IClientElement {
 
     private final Minecraft mc = Minecraft.getInstance();
+    private IteratableOption shieldIndicatorOption;
 
-    private boolean shieldIndicator;
+    public AttackIndicatorStatus shieldIndicator;
     private boolean hideOffHand;
 
     public CombatTestExtension(CombatTestElement parent) {
@@ -32,16 +38,31 @@ public class CombatTestExtension extends ElementExtension<CombatTestElement> imp
     @Override
     public void setupClient() {
 
+        this.addListener(this::onInitGui);
         this.addListener(this::onRenderHand);
         // don't want to mess up AttackIndicatorHelper when the event is cancelled by another mod
         this.addListener(this::onRenderGameOverlay, EventPriority.LOW);
     }
 
     @Override
+    public void loadClient() {
+
+        this.shieldIndicatorOption = GameOptionsHelper.<ForgeConfigSpec.EnumValue<AttackIndicatorStatus>, AttackIndicatorStatus, AttackIndicatorStatus>createGameOption(SwordBlockingMechanics.COMBAT_TEST, "Shield Indicator", "options.shieldIndicator", (optionValues, value) -> AttackIndicatorStatus.byId(value.getId() + optionValues), AttackIndicatorStatus::getResourceKey);
+    }
+
+    @Override
     public void setupClientConfig(ForgeConfigSpec.Builder builder) {
 
-        addToConfig(builder.comment("Show a shield indicator similar to the attack indicator when actively blocking.").define("Shield Indicator", true), v -> this.shieldIndicator = v);
+        addToConfig(builder.comment("Show a shield indicator similar to the attack indicator when actively blocking.").defineEnum("Shield Indicator", AttackIndicatorStatus.CROSSHAIR), v -> this.shieldIndicator = v);
         addToConfig(builder.comment("Items specified in the \"" + SwordBlockingMechanics.MODID + ":off_hand_render_blacklist\" item tag will not be rendered when held in the offhand.").define("Hide Off-Hand", true), v -> this.hideOffHand = v);
+    }
+
+    private void onInitGui(GuiScreenEvent.InitGuiEvent.Post evt) {
+
+        if (evt.getGui() instanceof VideoSettingsScreen) {
+
+            GameOptionsHelper.addOptionToScreen(evt.getGui(), this.shieldIndicatorOption);
+        }
     }
 
     private void onRenderHand(final RenderHandEvent evt) {
@@ -58,14 +79,14 @@ public class CombatTestExtension extends ElementExtension<CombatTestElement> imp
     @SuppressWarnings("ConstantConditions")
     private void onRenderGameOverlay(final RenderGameOverlayEvent evt) {
 
-        if (this.shieldIndicator && this.mc.player.isActiveItemStackBlocking()) {
+        if (this.mc.player.isActiveItemStackBlocking()) {
 
             boolean isPreRendering = evt instanceof RenderGameOverlayEvent.Pre;
             AttackIndicatorHelper.disableAttackIndicator(isPreRendering);
             if (!isPreRendering) {
 
                 MatrixStack matrixStack = evt.getMatrixStack();
-                switch (AttackIndicatorHelper.getActiveIndicator(evt.getType())) {
+                switch (AttackIndicatorHelper.getActiveIndicator(evt.getType(), this.shieldIndicator)) {
 
                     case CROSSHAIR:
 

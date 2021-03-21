@@ -149,10 +149,9 @@ public class ElementRegistry {
      * @param path path for config value
      * @return the config value
      */
-    @SuppressWarnings("unchecked")
     public static <T> Optional<T> getConfigValue(AbstractElement element, String... path) {
 
-        return Optional.ofNullable((T) ConfigManager.get().getConfigValue(element, path));
+        return ConfigManager.get().getConfigValue(element, path);
     }
 
     /**
