@@ -55,6 +55,16 @@ public class ConfigBuilder {
     /**
      * has the spec for this type been built yet (has {@link ConfigTypeData#getSpec} been called)
      * @param type type to check
+     * @return has spec been built
+     */
+    public boolean isSpecBuilt(ModConfig.Type type) {
+
+        return !this.isSpecNotBuilt(type);
+    }
+
+    /**
+     * has the spec for this type been built yet (has {@link ConfigTypeData#getSpec} been called)
+     * @param type type to check
      * @return has spec not been built
      */
     public boolean isSpecNotBuilt(ModConfig.Type type) {

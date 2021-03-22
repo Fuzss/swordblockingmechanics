@@ -31,4 +31,8 @@ public interface IProxy<T extends RecursiveEventLoop<?>> {
     @Nonnull
     PlayerEntity getPlayer(@Nullable PlayerEntity player);
 
+    default void addGuiFactory(String modId) {
+
+    }
+
 }

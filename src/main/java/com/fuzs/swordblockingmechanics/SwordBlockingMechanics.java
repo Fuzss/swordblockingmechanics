@@ -1,20 +1,17 @@
 package com.fuzs.swordblockingmechanics;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
+import com.fuzs.puzzleslib_sbm.client.config.ConfigScreen;
 import com.fuzs.puzzleslib_sbm.config.ConfigManager;
-import com.fuzs.puzzleslib_sbm.config.ConfigValueData;
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import com.fuzs.puzzleslib_sbm.element.ElementRegistry;
 import com.fuzs.swordblockingmechanics.element.CombatTestElement;
 import com.fuzs.swordblockingmechanics.element.SwordBlockingElement;
-import net.minecraft.client.settings.AttackIndicatorStatus;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Optional;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 @Mod(SwordBlockingMechanics.MODID)
@@ -31,6 +28,9 @@ public class SwordBlockingMechanics extends PuzzlesLib {
 
         ElementRegistry.setup(MODID);
         ConfigManager.get().load();
+        getProxy().addGuiFactory(MODID);
+
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, parent) -> new ConfigScreen(parent, MODID, NAME));
     }
 
 }

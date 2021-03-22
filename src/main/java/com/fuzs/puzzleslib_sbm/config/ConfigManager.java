@@ -1,19 +1,20 @@
 package com.fuzs.puzzleslib_sbm.config;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
+import com.fuzs.puzzleslib_sbm.client.config.BooleanConfigOption;
+import com.fuzs.puzzleslib_sbm.client.config.EnumConfigOption;
+import com.fuzs.puzzleslib_sbm.config.data.ConfigData;
+import com.fuzs.puzzleslib_sbm.config.data.IConfigData;
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import com.fuzs.puzzleslib_sbm.element.ElementRegistry;
 import com.fuzs.puzzleslib_sbm.util.INamespaceLocator;
-import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import net.minecraft.client.settings.AttackIndicatorStatus;
+import com.google.common.collect.*;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -22,6 +23,7 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,11 +45,11 @@ public class ConfigManager implements INamespaceLocator {
     /**
      * all config entries as a set
      */
-    private final Multimap<AbstractElement, ConfigValueData<? extends ForgeConfigSpec.ConfigValue<?>, ?, ?>> configData = HashMultimap.create();
+    private final Multimap<AbstractElement, IConfigData<?, ?>> configData = HashMultimap.create();
     /**
      * listeners to call when a config is somehow loaded
      */
-    private final Multimap<ModConfig.Type, Runnable> configListeners = HashMultimap.create();
+    private final Set<ReloadListener> reloadListeners = Sets.newHashSet();
 
     /**
      * this class is a singleton
@@ -106,17 +108,20 @@ public class ConfigManager implements INamespaceLocator {
     /**
      * sync config entries for specific type of config
      * call listeners for type as the config has somehow been loaded
-     * @param modid mod to get entries for
+     * @param modId mod to get entries for
      * @param type config type for this listener
      * @return was any data found for syncing
      */
-    private boolean syncAll(@Nullable String modid, ModConfig.Type type) {
+    private boolean syncAll(@Nullable String modId, ModConfig.Type type) {
 
-        Collection<ConfigValueData<? extends ForgeConfigSpec.ConfigValue<?>, ?, ?>> data = this.getAllConfigData(modid, type);
+        Collection<IConfigData<?, ?>> data = this.getAllConfigData(modId, type, true);
         if (!data.isEmpty()) {
 
-            data.forEach(ConfigValueData::sync);
-            this.configListeners.get(type).forEach(Runnable::run);
+            data.forEach(IConfigData::sync);
+            this.reloadListeners.stream()
+                    .filter(listener -> listener.isModId(modId))
+                    .filter(listener -> listener.isType(type))
+                    .forEach(ReloadListener::run);
 
             return true;
         }
@@ -125,18 +130,32 @@ public class ConfigManager implements INamespaceLocator {
     }
 
     /**
-     * @param modid mod to get entries for
+     * @param modId mod to get entries for
      * @param type config type for this listener
      * @return collection of enabled entries only for this mod and type
      */
-    private Collection<ConfigValueData<? extends ForgeConfigSpec.ConfigValue<?>, ?, ?>> getAllConfigData(@Nullable String modid, ModConfig.Type type) {
+    public Collection<IConfigData<?, ?>> getAllConfigData(@Nullable String modId, ModConfig.Type type, boolean onlyEnabled) {
 
         return this.configData.entries().stream()
-                .filter(entry -> modid == null || entry.getKey().getRegistryName().getNamespace().equals(modid))
-                .filter(entry -> entry.getKey().isEnabled())
+                .filter(entry -> modId == null || entry.getKey().getRegistryName().getNamespace().equals(modId))
+                .filter(entry -> !onlyEnabled || entry.getKey().isEnabled())
                 .map(Map.Entry::getValue)
-                .filter(value -> value.type == type)
+                .filter(data -> data.isType(type))
                 .collect(Collectors.toSet());
+    }
+
+    public Multimap<AbstractElement, IConfigData<?, ?>> getAllConfigData(String modId) {
+
+        Multimap<AbstractElement, IConfigData<?, ?>> modMap = HashMultimap.create();
+        for (Map.Entry<AbstractElement, IConfigData<?, ?>> entry : this.configData.entries()) {
+
+            if (entry.getKey().getRegistryName().getNamespace().equals(modId)) {
+
+                modMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return modMap;
     }
 
     /**
@@ -149,23 +168,7 @@ public class ConfigManager implements INamespaceLocator {
         if (element.isEnabled()) {
 
             return this.<ForgeConfigSpec.ConfigValue<Object>, Object, T>getConfigData(element, path)
-                    .map(ConfigValueData::getValue);
-        }
-
-        return Optional.empty();
-    }
-
-    public Optional<String> getConfigComment(AbstractElement element, String... path) {
-
-        Optional<ConfigValueData<ForgeConfigSpec.ConfigValue<Object>, Object, Object>> optionValue = this.getConfigData(element, path);
-        if (optionValue.isPresent()) {
-
-            ConfigValueData<?, ?, ?> data = optionValue.get();
-            ConfigBuilder builder = this.getBuilder(element.getRegistryName().getNamespace());
-            if (!builder.isSpecNotBuilt(data.type)) {
-
-                return Optional.ofNullable(data.getComment(builder.getSpec(data.type)));
-            }
+                    .map(ConfigData::get);
         }
 
         return Optional.empty();
@@ -177,14 +180,14 @@ public class ConfigManager implements INamespaceLocator {
      * @return config data
      */
     @SuppressWarnings("unchecked")
-    public <S extends ForgeConfigSpec.ConfigValue<T>, T, R> Optional<ConfigValueData<S, T, R>> getConfigData(AbstractElement element, String... path) {
+    public <S extends ForgeConfigSpec.ConfigValue<T>, T, R> Optional<ConfigData<S, T, R>> getConfigData(AbstractElement element, String... path) {
 
         String singlePath = concatConfigPath(element, path);
-        for (ConfigValueData<? extends ForgeConfigSpec.ConfigValue<?>, ?, ?> data : this.configData.get(element)) {
+        for (IConfigData<?, ?> data : this.configData.get(element)) {
 
             if (data.isAtPath(singlePath)) {
 
-                return Optional.of((ConfigValueData<S, T, R>) data);
+                return Optional.of((ConfigData<S, T, R>) data);
             }
         }
 
@@ -240,7 +243,7 @@ public class ConfigManager implements INamespaceLocator {
      */
     private <S extends ForgeConfigSpec.ConfigValue<T>, T, R> void registerEntry(S entry, ModConfig.Type type, Consumer<R> action, Function<T, R> transformer) {
 
-        this.configData.put(ElementRegistry.EMPTY, new ConfigValueData<>(entry, type, action, transformer));
+        this.configData.put(ElementRegistry.EMPTY, create(entry, type, action, transformer));
     }
 
     /**
@@ -273,7 +276,7 @@ public class ConfigManager implements INamespaceLocator {
             PuzzlesLib.LOGGER.error("Unable to register config entry: " + "Active builder is null");
         } else if (builder.isSpecNotBuilt(activeTuple.getRight())) {
 
-            this.configData.put(activeTuple.getLeft(), new ConfigValueData<>(entry, activeTuple.getRight(), action, transformer));
+            this.configData.put(activeTuple.getLeft(), create(entry, activeTuple.getRight(), action, transformer));
         } else {
 
             PuzzlesLib.LOGGER.error("Unable to register config entry: " + "Config spec already built");
@@ -282,12 +285,24 @@ public class ConfigManager implements INamespaceLocator {
 
     /**
      * add a listener for when the config is somehow loaded
-     * @param listener listener to add
+     * @param element parent element for mod id
      * @param type config type for this listener
+     * @param onReload listener to add
      */
-    public void addListener(Runnable listener, ModConfig.Type type) {
+    public void addListener(AbstractElement element, ModConfig.Type type, Runnable onReload) {
 
-        this.configListeners.put(type, listener);
+        this.reloadListeners.add(new ReloadListener(element.getRegistryName().getNamespace(), type, onReload));
+    }
+
+    /**
+     * add a listener for when the config is somehow loaded
+     * @param modId parent mod id
+     * @param type config type for this listener
+     * @param onReload listener to add
+     */
+    public void addListener(String modId, ModConfig.Type type, Runnable onReload) {
+
+        this.reloadListeners.add(new ReloadListener(modId, type, onReload));
     }
 
     /**
@@ -338,6 +353,24 @@ public class ConfigManager implements INamespaceLocator {
         return Stream.concat(Stream.of(element.getRegistryName().getPath()), Stream.of(path)).collect(Collectors.joining("."));
     }
 
+    private static <S extends ForgeConfigSpec.ConfigValue<T>, T, R> IConfigData<?, ?> create(S configValue, ModConfig.Type configType, Consumer<R> syncToField, Function<T, R> transformValue) {
+
+        if (FMLEnvironment.dist.isDedicatedServer()) {
+
+            return new ConfigData<>(configValue, configType, syncToField, transformValue);
+        }
+
+        if (configValue instanceof ForgeConfigSpec.EnumValue<?>) {
+
+            return new EnumConfigOption((ForgeConfigSpec.EnumValue) configValue, configType, syncToField, transformValue);
+        } else if (configValue instanceof ForgeConfigSpec.BooleanValue) {
+
+            return new BooleanConfigOption((ForgeConfigSpec.BooleanValue) configValue, configType, (Consumer<Boolean>) syncToField, (Function<Boolean, Boolean>) transformValue);
+        }
+
+        return new ConfigData<>(configValue, configType, syncToField, transformValue);
+    }
+
     /**
      * get builder for active mod, create if not present
      * @return builder for active mod
@@ -377,6 +410,36 @@ public class ConfigManager implements INamespaceLocator {
     public static ConfigBuilder builder() {
 
         return get().getBuilder();
+    }
+
+    private static class ReloadListener {
+
+        private final String modId;
+        private final ModConfig.Type type;
+        private final Runnable onReload;
+
+        public ReloadListener(String modId, ModConfig.Type type, Runnable onReload) {
+
+            this.modId = modId;
+            this.type = type;
+            this.onReload = onReload;
+        }
+
+        boolean isModId(@Nullable String modId) {
+
+            return modId == null || this.modId.equals(modId);
+        }
+
+        boolean isType(ModConfig.Type type) {
+
+            return this.type == type;
+        }
+
+        void run() {
+
+            this.onReload.run();
+        }
+
     }
 
 }

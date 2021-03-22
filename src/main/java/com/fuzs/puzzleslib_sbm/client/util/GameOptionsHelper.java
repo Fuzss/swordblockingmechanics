@@ -1,7 +1,7 @@
 package com.fuzs.puzzleslib_sbm.client.util;
 
 import com.fuzs.puzzleslib_sbm.config.ConfigManager;
-import com.fuzs.puzzleslib_sbm.config.ConfigValueData;
+import com.fuzs.puzzleslib_sbm.config.data.ConfigData;
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import com.fuzs.swordblockingmechanics.mixin.client.accessor.IOptionSliderAccessor;
 import net.minecraft.client.AbstractOption;
@@ -24,21 +24,21 @@ import java.util.function.Function;
 
 public class GameOptionsHelper {
 
-    public static <S extends ForgeConfigSpec.ConfigValue<T>, T, R> IteratableOption createGameOption(AbstractElement element, String path, String translationKeyIn, BiFunction<Integer, T, T> setter, Function<R, String> resourceKey) {
-
-        Optional<ConfigValueData<S, T, R>> optionValue = ConfigManager.get().getConfigData(element, path);
-        if (optionValue.isPresent()) {
-
-            ConfigValueData<S, T, R> data = optionValue.get();
-            return new IteratableOption(translationKeyIn, (settings, optionValues) -> data.modifyConfigValue(value -> setter.apply(optionValues, value)), (settings, optionValues) -> {
-
-                ConfigManager.get().getConfigComment(element, path).ifPresent(comment -> optionValues.setOptionValues(Minecraft.getInstance().fontRenderer.trimStringToWidth(new StringTextComponent(comment), 200)));
-                return new TranslationTextComponent("options.generic_value", new TranslationTextComponent(translationKeyIn), new TranslationTextComponent(resourceKey.apply(data.getValue())));
-            });
-        }
-
-        return null;
-    }
+//    public static <S extends ForgeConfigSpec.ConfigValue<T>, T, R> IteratableOption createGameOption(AbstractElement element, String path, String translationKeyIn, BiFunction<Integer, T, T> setter, Function<R, String> resourceKey) {
+//
+//        Optional<ConfigData<S, T, R>> optionValue = ConfigManager.get().getConfigData(element, path);
+//        if (optionValue.isPresent()) {
+//
+//            ConfigData<S, T, R> data = optionValue.get();
+//            return new IteratableOption(translationKeyIn, (settings, optionValues) -> data.modify(value -> setter.apply(optionValues, value)), (settings, optionValues) -> {
+//
+//                ConfigManager.get().getConfigComment(element, path).ifPresent(comment -> optionValues.setOptionValues(Minecraft.getInstance().fontRenderer.trimStringToWidth(new StringTextComponent(comment), 200)));
+//                return new TranslationTextComponent("options.generic_value", new TranslationTextComponent(translationKeyIn), new TranslationTextComponent(resourceKey.apply(data.get())));
+//            });
+//        }
+//
+//        return null;
+//    }
 
     public static void addOptionToScreen(Screen screen, AbstractOption option) {
 
