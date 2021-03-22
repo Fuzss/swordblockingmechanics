@@ -8,6 +8,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -18,13 +19,19 @@ public class EnumConfigOption<T extends Enum<T>> extends ConfigOption<ForgeConfi
         super(configValue, configType, syncToField, transformValue);
     }
 
+    @Override
+    protected String[] processComment(String[] splitComment) {
+
+        return Arrays.copyOf(splitComment, splitComment.length - 1);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Widget createWidget(int xIn, int yIn, int widthIn) {
 
         return new OptionButton(xIn, yIn, widthIn, 20, this, this.getMessage(), button -> {
 
-            this.modify(value -> {
+            this.advanceButton(value -> {
 
                 T[] allValues = (T[]) this.get().getClass().getEnumConstants();
                 int index = ArrayUtils.indexOf(allValues, value);

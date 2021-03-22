@@ -38,10 +38,11 @@ public abstract class ConfigOption<S extends ForgeConfigSpec.ConfigValue<T>, T, 
      * value spec for context
      */
     protected ForgeConfigSpec.ValueSpec valueSpec;
+    private T currentValue;
     /**
      * name of this for config screen
      */
-    private final StringTextComponent name;
+    private final ITextComponent name;
     /**
      * config path for value
      */
@@ -74,7 +75,7 @@ public abstract class ConfigOption<S extends ForgeConfigSpec.ConfigValue<T>, T, 
     }
 
     @Override
-    protected final ITextComponent getBaseMessageTranslation() {
+    public final ITextComponent getBaseMessageTranslation() {
 
         return this.name;
     }
@@ -104,6 +105,20 @@ public abstract class ConfigOption<S extends ForgeConfigSpec.ConfigValue<T>, T, 
         this.sync();
     }
 
+    protected void advanceButton(UnaryOperator<T> operator) {
+
+        this.currentValue = operator.apply(this.currentValue);
+    }
+
+    public void onConfirm() {
+
+        if (this.currentValue != this.getRaw()) {
+
+            this.configValue.set(this.currentValue);
+            this.sync();
+        }
+    }
+
     @Override
     public boolean isAtPath(String path) {
 
@@ -130,7 +145,7 @@ public abstract class ConfigOption<S extends ForgeConfigSpec.ConfigValue<T>, T, 
         String fullComment = this.valueSpec.getComment();
         String[] splitComment = fullComment.split("\n");
         List<IReorderingProcessor> values = Lists.newArrayList();
-        for (String comment : splitComment) {
+        for (String comment : this.processComment(splitComment)) {
 
             values.addAll(fontRenderer.trimStringToWidth(new StringTextComponent(comment), 200));
         }
@@ -138,25 +153,31 @@ public abstract class ConfigOption<S extends ForgeConfigSpec.ConfigValue<T>, T, 
         this.setOptionValues(ImmutableList.copyOf(values));
     }
 
+    protected String[] processComment(String[] splitComment) {
+
+        return splitComment;
+    }
+
     @Override
     public final Widget createWidget(GameSettings options, int xIn, int yIn, int widthIn) {
 
+        this.currentValue = this.getRaw();
         this.createComment(Minecraft.getInstance().fontRenderer);
         return this.createWidget(xIn, yIn, widthIn);
     }
 
     protected final void setMessage(Widget widget) {
 
-        widget.setMessage(this.getMessage(this.get()));
+        widget.setMessage(this.getMessage(this.currentValue));
     }
 
     protected final ITextComponent getMessage() {
 
-        return this.getMessage(this.get());
+        return this.getMessage(this.currentValue);
     }
 
     protected abstract Widget createWidget(int xIn, int yIn, int widthIn);
 
-    protected abstract ITextComponent getMessage(R value);
+    protected abstract ITextComponent getMessage(T value);
 
 }

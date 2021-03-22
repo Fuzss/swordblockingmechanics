@@ -273,6 +273,13 @@ public abstract class AbstractElement extends EventListener implements IConfigur
         return this.eventListeners;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+
+        return obj == this || obj instanceof AbstractElement && ((AbstractElement) obj).getRegistryName().equals(this.getRegistryName());
+
+    }
+
     /**
      * empty element needed for some aspects of {@link com.fuzs.puzzleslib_sbm.config.ConfigManager}
      */

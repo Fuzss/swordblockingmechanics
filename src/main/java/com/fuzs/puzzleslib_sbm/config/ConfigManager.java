@@ -2,6 +2,7 @@ package com.fuzs.puzzleslib_sbm.config;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
 import com.fuzs.puzzleslib_sbm.client.config.BooleanConfigOption;
+import com.fuzs.puzzleslib_sbm.client.config.ConfigOption;
 import com.fuzs.puzzleslib_sbm.client.config.EnumConfigOption;
 import com.fuzs.puzzleslib_sbm.config.data.ConfigData;
 import com.fuzs.puzzleslib_sbm.config.data.IConfigData;
@@ -23,7 +24,6 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -144,14 +144,23 @@ public class ConfigManager implements INamespaceLocator {
                 .collect(Collectors.toSet());
     }
 
-    public Multimap<AbstractElement, IConfigData<?, ?>> getAllConfigData(String modId) {
+    public Multimap<AbstractElement, ConfigOption<?, ?, ?>> getAllConfigOptions(String modId) {
 
-        Multimap<AbstractElement, IConfigData<?, ?>> modMap = HashMultimap.create();
+        Multimap<AbstractElement, ConfigOption<?, ?, ?>> modMap = TreeMultimap.create((key1, key2) -> {
+
+            return key1.getDisplayName().compareToIgnoreCase(key2.getDisplayName());
+        }, (value1, value2) -> {
+
+            return value1.getBaseMessageTranslation().getString().compareToIgnoreCase(value2.getBaseMessageTranslation().getString());
+        });
         for (Map.Entry<AbstractElement, IConfigData<?, ?>> entry : this.configData.entries()) {
 
             if (entry.getKey().getRegistryName().getNamespace().equals(modId)) {
 
-                modMap.put(entry.getKey(), entry.getValue());
+                if (entry.getValue() instanceof ConfigOption<?, ?, ?>) {
+
+                    modMap.put(entry.getKey(), (ConfigOption<?, ?, ?>) entry.getValue());
+                }
             }
         }
 

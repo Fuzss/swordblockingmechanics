@@ -22,7 +22,7 @@ public class BooleanConfigOption extends ConfigOption<ForgeConfigSpec.BooleanVal
 
         return new OptionButton(xIn, yIn, widthIn, 20, this, this.getMessage(), button -> {
 
-            this.modify(value -> !value);
+            this.advanceButton(value -> !value);
             this.setMessage(button);
         });
     }
