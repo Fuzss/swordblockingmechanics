@@ -1,6 +1,7 @@
 package com.fuzs.puzzleslib_sbm.config;
 
 
+import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -27,7 +28,7 @@ class ConfigTypeData {
     /**
      * builder for this type
      */
-    private ForgeConfigSpec.Builder builder;
+    private OptionsBuilder builder;
 
     /**
      * @param type type of config for file name
@@ -93,11 +94,11 @@ class ConfigTypeData {
     /**
      * @return builder for type of this entry
      */
-    ForgeConfigSpec.Builder getBuilder() {
+    OptionsBuilder getBuilder() {
 
         if (this.builder == null) {
 
-            this.builder = new ForgeConfigSpec.Builder();
+            this.builder = new OptionsBuilder(this.type);
         }
 
         return this.builder;
@@ -116,7 +117,7 @@ class ConfigTypeData {
      * @param context context for supplying modid
      * @return full config name with path as prefix
      */
-    String getName(ModLoadingContext context) {
+    String getFileName(ModLoadingContext context) {
 
         String modId = context.getActiveContainer().getModId();
         return this.path + ConfigManager.getConfigName(modId, this.type);

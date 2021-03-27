@@ -151,7 +151,7 @@ public class ElementRegistry {
      */
     public static <T> Optional<T> getConfigValue(AbstractElement element, String... path) {
 
-        return ConfigManager.get().getConfigValue(element, path);
+        return element.getValue(path);
     }
 
     /**

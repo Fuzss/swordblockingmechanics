@@ -1,5 +1,6 @@
 package com.fuzs.swordblockingmechanics.element;
 
+import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.extension.ClientExtensibleElement;
 import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
 import com.fuzs.swordblockingmechanics.client.element.CombatTestExtension;
@@ -15,7 +16,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
@@ -62,15 +62,15 @@ public class CombatTestElement extends ClientExtensibleElement<CombatTestExtensi
     }
 
     @Override
-    public void setupCommonConfig(ForgeConfigSpec.Builder builder) {
+    public void setupCommonConfig(OptionsBuilder builder) {
 
-        addToConfig(builder.comment("Increase snowball and egg stack size from 16 to 64, and potion stack size from 1 to 16.").define("Increase Stack Size", true), this::setMaxStackSize);
-        addToConfig(builder.comment("Add a delay of 4 ticks between throwing snowballs or eggs, just like with ender pearls.").define("Throwables Delay", true), v -> this.throwablesDelay = v);
-        addToConfig(builder.comment("Eating and drinking both are interrupted if the player receives damage.").define("Eating Interruption", true), v -> this.eatingInterruption = v);
-        addToConfig(builder.comment("Skip 5 tick warm-up delay when activating a shield.").define("Remove Shield Delay", true), v -> this.noShieldDelay = v);
-        addToConfig(builder.comment("Throwables such as snowballs, eggs and ender pearls pass through blocks without a collision shape like grass and flowers.").define("Pass-Through Throwables", true), v -> this.passThroughThrowables = v);
-        addToConfig(builder.comment("Attack cooldown is unaffected by switching items.").define("Fast Tool Switching", true), v -> this.fastSwitching = v);
-        addToConfig(builder.comment("It only takes 20 ticks to drink liquid foods instead of 32 or 40.").define("Fast Drinking", true), v -> this.fastDrinking = v);
+        builder.define("Increase Stack Size", true).comment("Increase snowball and egg stack size from 16 to 64, and potion stack size from 1 to 16.").sync(this::setMaxStackSize)
+                .next().define("Throwables Delay", true).comment("Add a delay of 4 ticks between throwing snowballs or eggs, just like with ender pearls.").sync(v -> this.throwablesDelay = v)
+                .next().define("Eating Interruption", true).comment("Eating and drinking both are interrupted if the player receives damage.").sync(v -> this.eatingInterruption = v)
+                .next().define("Remove Shield Delay", true).comment("Skip 5 tick warm-up delay when activating a shield.").sync(v -> this.noShieldDelay = v)
+                .next().define("Pass-Through Throwables", true).comment("Throwables such as snowballs, eggs and ender pearls pass through blocks without a collision shape like grass and flowers.").sync(v -> this.passThroughThrowables = v)
+                .next().define("Fast Tool Switching", true).comment("Attack cooldown is unaffected by switching items.").sync(v -> this.fastSwitching = v)
+                .next().define("Fast Drinking", true).comment("It only takes 20 ticks to drink liquid foods instead of 32 or 40.").sync(v -> this.fastDrinking = v);
     }
 
     private void onProjectileImpact(final ProjectileImpactEvent evt) {

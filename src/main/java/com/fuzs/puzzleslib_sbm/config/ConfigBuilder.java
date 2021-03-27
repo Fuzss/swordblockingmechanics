@@ -1,6 +1,7 @@
 package com.fuzs.puzzleslib_sbm.config;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
+import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.config.json.JsonConfigFileUtil;
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -22,24 +23,13 @@ public class ConfigBuilder {
     /**
      * enum map of config type entries for storing and managing builders, specs and file names for every type
      */
-    private final EnumMap<ModConfig.Type, ConfigTypeData> configTypeEntries = Stream.of(ModConfig.Type.values())
+    private final EnumMap<ModConfig.Type, ConfigTypeData> configTypeData = Stream.of(ModConfig.Type.values())
             .collect(Collectors.toMap(Function.identity(), ConfigTypeData::new, (key1, key2) -> key1, () -> new EnumMap<>(ModConfig.Type.class)));
 
     /**
      * config type of category currently being built
      */
     private Pair<AbstractElement, ModConfig.Type> activeTuple;
-
-    /**
-     * add a spec when building config manually
-     * @param spec spec to add
-     * @param type type to add
-     * @return was adding successful (spec not present yet)
-     */
-    public boolean addSpec(ModConfig.Type type, ForgeConfigSpec spec) {
-
-        return this.configTypeEntries.get(type).addSpec(spec);
-    }
 
     /**
      * get spec, build from builder if absent
@@ -49,7 +39,7 @@ public class ConfigBuilder {
     @Nullable
     public ForgeConfigSpec getSpec(ModConfig.Type type) {
 
-        return this.configTypeEntries.get(type).getSpec();
+        return this.configTypeData.get(type).getSpec();
     }
 
     /**
@@ -69,7 +59,7 @@ public class ConfigBuilder {
      */
     public boolean isSpecNotBuilt(ModConfig.Type type) {
 
-        return this.configTypeEntries.get(type).isSpecNotBuilt();
+        return this.configTypeData.get(type).isSpecNotBuilt();
     }
 
     /**
@@ -80,7 +70,7 @@ public class ConfigBuilder {
     @SuppressWarnings("ConstantConditions")
     public boolean isSpecNotValid(ModConfig.Type type) {
 
-        return this.isSpecNotBuilt(type) || !this.configTypeEntries.get(type).getSpec().isLoaded();
+        return this.isSpecNotBuilt(type) || !this.configTypeData.get(type).getSpec().isLoaded();
     }
 
     /**
@@ -92,9 +82,7 @@ public class ConfigBuilder {
      */
     public void create(AbstractElement element, ModConfig.Type type, Consumer<ForgeConfigSpec.Builder> options, String... comments) {
 
-        this.activeTuple = Pair.of(element, type);
-
-        ForgeConfigSpec.Builder builder = this.configTypeEntries.get(type).getBuilder();
+        OptionsBuilder builder = this.configTypeData.get(type).getBuilder();
         if (comments.length != 0) {
 
             builder.comment(comments);
@@ -103,8 +91,6 @@ public class ConfigBuilder {
         builder.push(element.getRegistryName().getPath());
         options.accept(builder);
         builder.pop();
-
-        this.activeTuple = null;
     }
 
     /**
@@ -115,10 +101,10 @@ public class ConfigBuilder {
 
         for (ModConfig.Type type : ModConfig.Type.values()) {
 
-            ConfigTypeData typeEntry = this.configTypeEntries.get(type);
+            ConfigTypeData typeEntry = this.configTypeData.get(type);
             if (typeEntry.canBuildSpec()) {
 
-                context.registerConfig(type, typeEntry.getSpec(), typeEntry.getName(context));
+                context.registerConfig(type, typeEntry.getSpec(), typeEntry.getFileName(context));
             }
         }
     }
@@ -133,19 +119,11 @@ public class ConfigBuilder {
 
             String prefix = String.join(File.separator, folderName);
             JsonConfigFileUtil.mkdirs(prefix);
-            this.configTypeEntries.values().forEach(typeEntry -> typeEntry.setPrefix(prefix + File.separator));
+            this.configTypeData.values().forEach(typeEntry -> typeEntry.setPrefix(prefix + File.separator));
         } else {
 
             PuzzlesLib.LOGGER.error("Unable to move config files to folder" + ":" + "Invalid path");
         }
-    }
-
-    /**
-     * @return active element and type of category currently being built
-     */
-    public Pair<AbstractElement, ModConfig.Type> getActiveTuple() {
-
-        return this.activeTuple;
     }
 
 }

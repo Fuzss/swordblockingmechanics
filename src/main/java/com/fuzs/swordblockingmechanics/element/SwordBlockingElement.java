@@ -1,6 +1,7 @@
 package com.fuzs.swordblockingmechanics.element;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
+import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.extension.ClientExtensibleElement;
 import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
 import com.fuzs.swordblockingmechanics.client.element.SwordBlockingExtension;
@@ -12,7 +13,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.*;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
@@ -59,7 +59,7 @@ public class SwordBlockingElement extends ClientExtensibleElement<SwordBlockingE
     }
 
     @Override
-    public void setupCommonConfig(ForgeConfigSpec.Builder builder) {
+    public void setupCommonConfig(OptionsBuilder builder) {
 
         addToConfig(builder.comment("Prioritize usable off-hand items over sword blocking.", "Items not recognized by default can be included using the \"" + SwordBlockingMechanics.MODID + ":blocking/off_hand_blacklist\" item tag.").define("Prioritize Off-Hand", true), v -> this.prioritizeOffHand = v);
         addToConfig(builder.comment("Percentage an incoming attack will be reduced by when blocking.").defineInRange("Blocked Damage", 0.5, 0.0, 1.0), v -> this.blockedDamage = v, Double::floatValue);

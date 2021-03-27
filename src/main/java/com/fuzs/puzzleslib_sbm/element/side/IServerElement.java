@@ -1,6 +1,6 @@
 package com.fuzs.puzzleslib_sbm.element.side;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
 
 /**
  * implement this for elements with server-side capabilities
@@ -34,7 +34,7 @@ public interface IServerElement extends ISidedElement {
      *
      * @param builder builder for server config
      */
-    default void setupServerConfig(ForgeConfigSpec.Builder builder) {
+    default void setupServerConfig(OptionsBuilder builder) {
 
     }
 
