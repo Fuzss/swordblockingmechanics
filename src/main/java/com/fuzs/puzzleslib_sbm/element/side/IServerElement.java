@@ -1,6 +1,6 @@
 package com.fuzs.puzzleslib_sbm.element.side;
 
-import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 
 /**
  * implement this for elements with server-side capabilities
@@ -31,7 +31,6 @@ public interface IServerElement extends ISidedElement {
 
     /**
      * build server config
-     *
      * @param builder builder for server config
      */
     default void setupServerConfig(OptionsBuilder builder) {

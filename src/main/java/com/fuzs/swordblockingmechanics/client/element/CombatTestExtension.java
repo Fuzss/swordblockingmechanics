@@ -1,5 +1,6 @@
 package com.fuzs.swordblockingmechanics.client.element;
 
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.extension.ElementExtension;
 import com.fuzs.puzzleslib_sbm.element.side.IClientElement;
 import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
@@ -15,7 +16,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.world.GameType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.EventPriority;
 
 public class CombatTestExtension extends ElementExtension<CombatTestElement> implements IClientElement {
@@ -39,10 +39,10 @@ public class CombatTestExtension extends ElementExtension<CombatTestElement> imp
     }
 
     @Override
-    public void setupClientConfig(ForgeConfigSpec.Builder builder) {
+    public void setupClientConfig(OptionsBuilder builder) {
 
-        addToConfig(builder.comment("Show a shield indicator similar to the attack indicator when actively blocking.").defineEnum("Shield Indicator", AttackIndicatorStatus.CROSSHAIR), v -> this.shieldIndicator = v);
-        addToConfig(builder.comment("Items specified in the \"" + SwordBlockingMechanics.MODID + ":off_hand_render_blacklist\" item tag will not be rendered when held in the offhand.").define("Hide Off-Hand", true), v -> this.hideOffHand = v);
+        builder.define("Shield Indicator", AttackIndicatorStatus.CROSSHAIR).comment("Show a shield indicator similar to the attack indicator when actively blocking.").sync(v -> this.shieldIndicator = v);
+        builder.define("Hide Off-Hand", true).comment("Items specified in the \"" + SwordBlockingMechanics.MODID + ":off_hand_render_blacklist\" item tag will not be rendered when held in the offhand.").sync(v -> this.hideOffHand = v);
     }
 
     private void onRenderHand(final RenderHandEvent evt) {

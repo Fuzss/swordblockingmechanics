@@ -1,7 +1,7 @@
 package com.fuzs.swordblockingmechanics.element;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
-import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.extension.ClientExtensibleElement;
 import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
 import com.fuzs.swordblockingmechanics.client.element.SwordBlockingExtension;
@@ -61,13 +61,13 @@ public class SwordBlockingElement extends ClientExtensibleElement<SwordBlockingE
     @Override
     public void setupCommonConfig(OptionsBuilder builder) {
 
-        addToConfig(builder.comment("Prioritize usable off-hand items over sword blocking.", "Items not recognized by default can be included using the \"" + SwordBlockingMechanics.MODID + ":blocking/off_hand_blacklist\" item tag.").define("Prioritize Off-Hand", true), v -> this.prioritizeOffHand = v);
-        addToConfig(builder.comment("Percentage an incoming attack will be reduced by when blocking.").defineInRange("Blocked Damage", 0.5, 0.0, 1.0), v -> this.blockedDamage = v, Double::floatValue);
-        addToConfig(builder.comment("Damage sword when blocking an attack depending on the amount of damage blocked. Sword is only damaged when at least three damage points have been blocked, just like a shield.").define("Damage Sword", false), v -> this.damageSword = v);
-        addToConfig(builder.comment("Incoming projectiles such as arrows or tridents will ricochet while blocking.").define("Deflect Projectiles", false), v -> this.deflectProjectiles = v);
-        addToConfig(builder.comment("Amount of ticks after starting to block in which an attack will be completely nullified like when blocking with a shield.").defineInRange("Parry Window", 10, 0, 72000), v -> this.parryWindow = v);
-        addToConfig(builder.comment("Damage sword when successfully parrying depending on the amount of damage blocked. Sword is only damaged when at least three damage points have been parried, just like a shield.").define("Damage Sword On Parry", false), v -> this.damageSwordParry = v);
-        addToConfig(builder.comment("Blocking requires both hands, meaning the hand not holding the sword must be empty.").define("Require Both Hands", false), v -> this.requireBothHands = v);
+        builder.define("Prioritize Off-Hand", true).comment("Prioritize usable off-hand items over sword blocking.", "Items not recognized by default can be included using the \"" + SwordBlockingMechanics.MODID + ":blocking/off_hand_blacklist\" item tag.").sync(v -> this.prioritizeOffHand = v);
+        builder.define("Blocked Damage", 0.5).min(0.0).max(1.0).comment("Percentage an incoming attack will be reduced by when blocking.").sync(v -> this.blockedDamage = v.floatValue());
+        builder.define("Damage Sword", false).comment("Damage sword when blocking an attack depending on the amount of damage blocked. Sword is only damaged when at least three damage points have been blocked, just like a shield.").sync(v -> this.damageSword = v);
+        builder.define("Deflect Projectiles", false).comment("Incoming projectiles such as arrows or tridents will ricochet while blocking.").sync(v -> this.deflectProjectiles = v);
+        builder.define("Parry Window", 10).min(0).max(100).comment("Amount of ticks after starting to block in which an attack will be completely nullified like when blocking with a shield.").sync(v -> this.parryWindow = v);
+        builder.define("Damage Sword On Parry", false).comment("Damage sword when successfully parrying depending on the amount of damage blocked. Sword is only damaged when at least three damage points have been parried, just like a shield.").sync(v -> this.damageSwordParry = v);
+        builder.define("Require Both Hands", false).comment("Blocking requires both hands, meaning the hand not holding the sword must be empty.").sync(v -> this.requireBothHands = v);
     }
 
     private void onRightClickItem(final PlayerInteractEvent.RightClickItem evt) {

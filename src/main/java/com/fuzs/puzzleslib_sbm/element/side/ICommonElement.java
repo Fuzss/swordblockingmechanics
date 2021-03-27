@@ -1,7 +1,6 @@
 package com.fuzs.puzzleslib_sbm.element.side;
 
-import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
-import net.minecraftforge.common.ForgeConfigSpec;
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 
 /**
  * implement this for elements with common capabilities
@@ -32,7 +31,6 @@ public interface ICommonElement extends ISidedElement {
 
     /**
      * build common config
-     *
      * @param builder builder for common config
      */
     default void setupCommonConfig(OptionsBuilder builder) {

@@ -1,74 +1,18 @@
 package com.fuzs.puzzleslib_sbm.element;
 
-import com.fuzs.puzzleslib_sbm.config.ConfigManager;
-import com.fuzs.puzzleslib_sbm.config.serialization.EntryCollectionBuilder;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * add ability to listen to Forge events
  */
 @SuppressWarnings("unused")
 public abstract class EventListener {
-
-    /**
-     * @param entry config entry to add
-     * @param action consumer for updating value when changed
-     * @param <S> type of config value
-     * @param <T> field type
-     */
-    public static <S extends ForgeConfigSpec.ConfigValue<T>, T> void addToConfig(S entry, Consumer<T> action) {
-
-        ConfigManager.get().registerEntry(entry, action);
-    }
-
-    /**
-     * @param entry config entry to add
-     * @param action consumer for updating value when changed
-     * @param transformer transformation to apply when returning value
-     * @param <S> type of config value
-     * @param <T> field type
-     * @param <R> final return type of config entry
-     */
-    public static <S extends ForgeConfigSpec.ConfigValue<T>, T, R> void addToConfig(S entry, Consumer<R> action, Function<T, R> transformer) {
-
-        ConfigManager.get().registerEntry(entry, action, transformer);
-    }
-
-    /**
-     * deserialize string <code>data</code> into entries of a <code>registry</code>
-     * @param data data as string list as provided by Forge config
-     * @param registry registry to get entries from
-     * @param <T> type of registry
-     * @return deserialized data as set
-     */
-    public static <T extends IForgeRegistryEntry<T>> Set<T> deserializeToSet(List<String> data, IForgeRegistry<T> registry) {
-
-        return new EntryCollectionBuilder<>(registry).buildEntrySet(data);
-    }
-
-    /**
-     * deserialize string <code>data</code> into entries of a <code>registry</code>
-     * @param data data as string list as provided by Forge config
-     * @param registry registry to get entries from
-     * @param <T> type of registry
-     * @return deserialized data as map
-     */
-    public static <T extends IForgeRegistryEntry<T>> Map<T, double[]> deserializeToMap(List<String> data, IForgeRegistry<T> registry) {
-
-        return new EntryCollectionBuilder<>(registry).buildEntryMap(data);
-    }
 
     /**
      * @return event storage list

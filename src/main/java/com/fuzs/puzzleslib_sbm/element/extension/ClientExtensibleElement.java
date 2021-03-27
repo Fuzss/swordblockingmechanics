@@ -1,8 +1,8 @@
 package com.fuzs.puzzleslib_sbm.element.extension;
 
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.side.IClientElement;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.function.Function;
 
@@ -36,7 +36,7 @@ public abstract class ClientExtensibleElement<T extends ElementExtension<?> & IC
     }
 
     @Override
-    public final void setupClientConfig(ForgeConfigSpec.Builder builder) {
+    public final void setupClientConfig(OptionsBuilder builder) {
 
         this.extension.setupClientConfig(builder);
     }

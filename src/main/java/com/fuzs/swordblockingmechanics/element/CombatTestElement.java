@@ -1,6 +1,6 @@
 package com.fuzs.swordblockingmechanics.element;
 
-import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.extension.ClientExtensibleElement;
 import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
 import com.fuzs.swordblockingmechanics.client.element.CombatTestExtension;

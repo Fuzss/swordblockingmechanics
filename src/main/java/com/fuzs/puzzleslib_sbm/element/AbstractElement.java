@@ -1,11 +1,12 @@
 package com.fuzs.puzzleslib_sbm.element;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
-import com.fuzs.puzzleslib_sbm.config.implementation.ConfigOption;
-import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
+import com.fuzs.puzzleslib_sbm.config.option.ConfigOption;
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.side.IClientElement;
 import com.fuzs.puzzleslib_sbm.element.side.ICommonElement;
 import com.fuzs.puzzleslib_sbm.element.side.IServerElement;
+import com.fuzs.puzzleslib_sbm.element.side.ISidedElement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
@@ -114,7 +115,7 @@ public abstract class AbstractElement extends EventListener implements IConfigur
      */
     public final void setup() {
 
-        ElementRegistry.loadSides(this, ICommonElement::setupCommon, IClientElement::setupClient, IServerElement::setupServer);
+        ISidedElement.setup((ISidedElement) this);
     }
 
     /**
@@ -131,34 +132,16 @@ public abstract class AbstractElement extends EventListener implements IConfigur
             return;
         }
 
-        this.loadSide(evt);
+        ISidedElement.loadSide((ISidedElement) this, evt);
         if (this instanceof ICommonElement) {
 
             if (evt instanceof FMLCommonSetupEvent) {
 
                 this.reload(this.isEnabled(), true);
             }
-        } else if (evt instanceof FMLClientSetupEvent || evt instanceof FMLDedicatedServerSetupEvent) {
+        } else if (this instanceof IClientElement && evt instanceof FMLClientSetupEvent || this instanceof IServerElement && evt instanceof FMLDedicatedServerSetupEvent) {
 
             this.reload(this.isEnabled(), true);
-        }
-    }
-
-    /**
-     * initialize sided content, this will always happen, even when the element is not loaded
-     * @param evt setup event this is called from
-     */
-    private void loadSide(ParallelDispatchEvent evt) {
-
-        if (evt instanceof FMLCommonSetupEvent && this instanceof ICommonElement) {
-
-            ((ICommonElement) this).loadCommon();
-        } else if (evt instanceof FMLClientSetupEvent && this instanceof IClientElement) {
-
-            ((IClientElement) this).loadClient();
-        } else if (evt instanceof FMLDedicatedServerSetupEvent && this instanceof IServerElement) {
-
-            ((IServerElement) this).loadServer();
         }
     }
 
@@ -174,7 +157,7 @@ public abstract class AbstractElement extends EventListener implements IConfigur
         } else if (!firstLoad) {
 
             this.reloadEventListeners(false);
-            ElementRegistry.loadSides(this, ICommonElement::unloadCommon, IClientElement::unloadClient, IServerElement::unloadServer);
+            ISidedElement.unload((ISidedElement) this);
         }
     }
 
@@ -282,15 +265,22 @@ public abstract class AbstractElement extends EventListener implements IConfigur
      */
     public static AbstractElement createEmpty(ResourceLocation name) {
 
-        return new AbstractElement() {
+        return new EmptyElement(name);
+    }
 
-            @Override
-            public String[] getDescription() {
+    private static class EmptyElement extends AbstractElement implements ISidedElement {
 
-                return new String[0];
-            }
+        public EmptyElement(ResourceLocation name) {
 
-        }.setRegistryName(name);
+            this.setRegistryName(name);
+        }
+
+        @Override
+        public String[] getDescription() {
+
+            return new String[0];
+        }
+
     }
 
 }

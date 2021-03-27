@@ -1,7 +1,7 @@
 package com.fuzs.puzzleslib_sbm.element.side;
 
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.common.ForgeConfigSpec;
 
 /**
  * implement this for elements with client-side capabilities
@@ -32,10 +32,9 @@ public interface IClientElement extends ISidedElement {
 
     /**
      * build client config
-     *
      * @param builder builder for client config
      */
-    default void setupClientConfig(ForgeConfigSpec.Builder builder) {
+    default void setupClientConfig(OptionsBuilder builder) {
 
     }
 

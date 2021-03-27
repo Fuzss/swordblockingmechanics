@@ -1,5 +1,6 @@
 package com.fuzs.swordblockingmechanics.client.element;
 
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.extension.ElementExtension;
 import com.fuzs.puzzleslib_sbm.element.side.IClientElement;
 import com.fuzs.swordblockingmechanics.SwordBlockingMechanics;
@@ -28,7 +29,6 @@ import net.minecraft.world.GameType;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.EventPriority;
 
 import java.util.Map;
@@ -67,10 +67,10 @@ public class SwordBlockingExtension extends ElementExtension<SwordBlockingElemen
     }
 
     @Override
-    public void setupClientConfig(ForgeConfigSpec.Builder builder) {
+    public void setupClientConfig(OptionsBuilder builder) {
 
-        addToConfig(builder.comment("Use old third-person pose when blocking with a sword.").define("Old Blocking Pose", false), v -> this.oldBlockingPose = v);
-        addToConfig(builder.comment("Percentage to slow down movement to while blocking.").defineInRange("Blocking Slowdown", 0.2, 0.0, 1.0), v -> this.blockingSlowdown = v, Double::floatValue);
+        builder.define("Old Blocking Pose", false).comment("Use old third-person pose when blocking with a sword.").sync(v -> this.oldBlockingPose = v);
+        builder.define("Blocking Slowdown", 0.2).min(0.0).max(1.0).comment("Percentage to slow down movement to while blocking.").sync(v -> this.blockingSlowdown = v.floatValue());
     }
 
     @SuppressWarnings("ConstantConditions")

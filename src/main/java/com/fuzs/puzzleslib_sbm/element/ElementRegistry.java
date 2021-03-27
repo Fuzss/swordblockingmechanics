@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -153,30 +152,6 @@ public class ElementRegistry {
     }
 
     /**
-     * run code depending on element side type
-     * @param common consumer if implements {@link ICommonElement}
-     * @param client consumer if implements {@link IClientElement}
-     * @param server consumer if implements {@link IServerElement}
-     */
-    public static void loadSides(AbstractElement element, Consumer<ICommonElement> common, Consumer<IClientElement> client, Consumer<IServerElement> server) {
-
-        if (element instanceof ICommonElement) {
-
-            common.accept(((ICommonElement) element));
-        }
-
-        if (FMLEnvironment.dist.isClient() && element instanceof IClientElement) {
-
-            client.accept(((IClientElement) element));
-        }
-
-        if (FMLEnvironment.dist.isDedicatedServer() && element instanceof IServerElement) {
-
-            server.accept(((IServerElement) element));
-        }
-    }
-
-    /**
      * generate general config section for controlling elements, setup individual config sections and collect events to be registered in {@link #load}
      * @param modId mod id of active mod
      * @param config should config files be created
@@ -195,7 +170,11 @@ public class ElementRegistry {
 
         if (config) {
 
-            ConfigManager.load(modId, MOD_ELEMENTS.values(), path);
+            // create dummy element for general config section
+            AbstractElement generalElement = AbstractElement.createEmpty(new ResourceLocation(modId, "general"));
+            ConfigManager.load(generalElement, MOD_ELEMENTS.values(), type -> ConfigManager.getFileName(modId, type, path));
+            // add general option to storage so it can be reloaded
+            ELEMENTS.put(generalElement.getRegistryName(), generalElement);
         }
 
         MOD_ELEMENTS.values().forEach(AbstractElement::setup);

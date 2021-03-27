@@ -1,4 +1,4 @@
-package com.fuzs.puzzleslib_sbm.config.implementation;
+package com.fuzs.puzzleslib_sbm.config.option;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
@@ -14,9 +14,9 @@ public class BooleanOption extends ConfigOption<Boolean> {
 
     public static class BooleanOptionBuilder extends ConfigOptionBuilder<Boolean> {
 
-        BooleanOptionBuilder(OptionsBuilder builder, String name, Boolean defaultValue) {
+        BooleanOptionBuilder(String name, Boolean defaultValue) {
 
-            super(builder, name, defaultValue);
+            super(name, defaultValue);
         }
 
         @Override

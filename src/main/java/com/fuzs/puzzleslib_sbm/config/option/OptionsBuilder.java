@@ -1,4 +1,4 @@
-package com.fuzs.puzzleslib_sbm.config.implementation;
+package com.fuzs.puzzleslib_sbm.config.option;
 
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -7,6 +7,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public class OptionsBuilder {
 
     private final ForgeConfigSpec.Builder builder;
@@ -64,26 +65,46 @@ public class OptionsBuilder {
         return this.builder.build();
     }
 
-    public BooleanOption.BooleanOptionBuilder define(String name, boolean defaultValue) {
+    public StringOption.StringOptionBuilder define(String optionName, String defaultValue) {
 
-        return this.tryCreate(new BooleanOption.BooleanOptionBuilder(this, name, defaultValue));
+        return this.tryCreate(new StringOption.StringOptionBuilder(optionName, defaultValue));
     }
 
-    public IntegerOption.IntegerOptionBuilder define(String name, int defaultValue) {
+    public BooleanOption.BooleanOptionBuilder define(String optionName, boolean defaultValue) {
 
-        return this.tryCreate(new IntegerOption.IntegerOptionBuilder(this, name, defaultValue));
+        return this.tryCreate(new BooleanOption.BooleanOptionBuilder(optionName, defaultValue));
+    }
+
+    public IntegerOption.IntegerOptionBuilder define(String optionName, int defaultValue) {
+
+        return this.tryCreate(new IntegerOption.IntegerOptionBuilder(optionName, defaultValue));
+    }
+
+    public LongOption.LongOptionBuilder define(String optionName, long defaultValue) {
+
+        return this.tryCreate(new LongOption.LongOptionBuilder(optionName, defaultValue));
+    }
+
+    public DoubleOption.DoubleOptionBuilder define(String optionName, double defaultValue) {
+
+        return this.tryCreate(new DoubleOption.DoubleOptionBuilder(optionName, defaultValue));
+    }
+
+    public <T extends Enum<T>> EnumOption.EnumOptionBuilder<T> define(String optionName, T defaultValue) {
+
+        return this.tryCreate(new EnumOption.EnumOptionBuilder<>(optionName, defaultValue));
     }
 
     @Nullable
-    private <T extends ConfigOption.ConfigOptionBuilder<?>> T tryCreate(@Nullable T builder) {
+    private <T extends ConfigOption.ConfigOptionBuilder<?>> T tryCreate(@Nullable T optionBuilder) {
 
         if (this.activeOptionBuilder != null) {
 
             this.create(this.activeOptionBuilder);
         }
 
-        this.activeOptionBuilder = builder;
-        return builder;
+        this.activeOptionBuilder = optionBuilder;
+        return optionBuilder;
     }
 
     private <T> void create(ConfigOption.ConfigOptionBuilder<T> builder) {

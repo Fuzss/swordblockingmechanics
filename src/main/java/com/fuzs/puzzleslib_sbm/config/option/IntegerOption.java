@@ -1,4 +1,4 @@
-package com.fuzs.puzzleslib_sbm.config.implementation;
+package com.fuzs.puzzleslib_sbm.config.option;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
@@ -14,9 +14,9 @@ public class IntegerOption extends NumberOption<Integer> {
 
     public static class IntegerOptionBuilder extends NumberOption.NumberOptionBuilder<Integer> {
 
-        IntegerOptionBuilder(OptionsBuilder builder, String name, Integer defaultValue) {
+        IntegerOptionBuilder(String name, Integer defaultValue) {
 
-            super(builder, name, defaultValue);
+            super(name, defaultValue);
             this.minValue = Integer.MIN_VALUE;
             this.maxValue = Integer.MAX_VALUE;
         }

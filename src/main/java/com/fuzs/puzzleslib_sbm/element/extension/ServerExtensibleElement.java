@@ -1,6 +1,6 @@
 package com.fuzs.puzzleslib_sbm.element.extension;
 
-import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
+import com.fuzs.puzzleslib_sbm.config.option.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.side.IServerElement;
 import net.minecraftforge.api.distmarker.Dist;
 

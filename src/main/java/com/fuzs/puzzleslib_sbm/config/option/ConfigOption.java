@@ -1,4 +1,4 @@
-package com.fuzs.puzzleslib_sbm.config.implementation;
+package com.fuzs.puzzleslib_sbm.config.option;
 
 import com.google.common.collect.Lists;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -9,14 +9,14 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class ConfigOption<T> {
+@SuppressWarnings("unused")
+public abstract class ConfigOption<T> {
 
     private final ForgeConfigSpec.ConfigValue<T> value;
     private final ModConfig.Type type;
     private final List<String> path;
     private final String name;
     private final Supplier<T> defaultValue;
-    private final Class<?> clazz;
     private final boolean restart;
     private final String[] comment;
     private final List<Consumer<T>> syncConsumers;
@@ -29,7 +29,6 @@ public class ConfigOption<T> {
         this.path = value.getPath();
         this.name = builder.name;
         this.defaultValue = () -> builder.defaultValue;
-        this.clazz = builder.clazz;
         this.restart = builder.restart;
         this.comment = builder.comment;
         this.syncConsumers = builder.syncConsumers;
@@ -59,11 +58,6 @@ public class ConfigOption<T> {
     public T getDefault() {
 
         return this.defaultValue.get();
-    }
-
-    public Class<?> getClazz() {
-
-        return this.clazz;
     }
 
     public boolean isRestartRequired() {
@@ -101,21 +95,17 @@ public class ConfigOption<T> {
 
     public static abstract class ConfigOptionBuilder<T> {
 
-        private final OptionsBuilder builder;
         final String name;
         final T defaultValue;
         String[] comment = new String[0];
-        private final Class<?> clazz;
         private boolean restart;
         private final List<Consumer<T>> syncConsumers = Lists.newArrayList();
         private final List<Runnable> reloadListeners = Lists.newArrayList();
 
-        ConfigOptionBuilder(OptionsBuilder builder, String name, T defaultValue) {
+        ConfigOptionBuilder(String name, T defaultValue) {
 
-            this.builder = builder;
             this.name = name;
             this.defaultValue = defaultValue;
-            this.clazz = defaultValue.getClass();
         }
 
         public ConfigOptionBuilder<T> comment(String... comment) {
