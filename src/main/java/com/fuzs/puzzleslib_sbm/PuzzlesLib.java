@@ -1,7 +1,6 @@
 package com.fuzs.puzzleslib_sbm;
 
 import com.fuzs.puzzleslib_sbm.capability.CapabilityController;
-import com.fuzs.puzzleslib_sbm.config.ConfigManager;
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import com.fuzs.puzzleslib_sbm.element.ElementRegistry;
 import com.fuzs.puzzleslib_sbm.element.side.ISidedElement;
@@ -51,29 +50,17 @@ public class PuzzlesLib {
 
     protected void onCommonSetup(final FMLCommonSetupEvent evt) {
 
-        evt.enqueueWork(() -> {
-
-            ElementRegistry.load(evt);
-            ConfigManager.get().syncAll(ModConfig.Type.COMMON);
-        });
+        evt.enqueueWork(() -> ElementRegistry.load(evt, ModConfig.Type.COMMON));
     }
 
     protected void onClientSetup(final FMLClientSetupEvent evt) {
 
-        evt.enqueueWork(() -> {
-
-            ElementRegistry.load(evt);
-            ConfigManager.get().syncAll(ModConfig.Type.CLIENT);
-        });
+        evt.enqueueWork(() -> ElementRegistry.load(evt, ModConfig.Type.CLIENT));
     }
 
     protected void onServerSetup(final FMLDedicatedServerSetupEvent evt) {
 
-        evt.enqueueWork(() -> {
-
-            ElementRegistry.load(evt);
-            ConfigManager.get().syncAll(ModConfig.Type.SERVER);
-        });
+        evt.enqueueWork(() -> ElementRegistry.load(evt, ModConfig.Type.SERVER));
     }
 
     /**

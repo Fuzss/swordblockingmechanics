@@ -1,14 +1,10 @@
 package com.fuzs.swordblockingmechanics;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
-import com.fuzs.puzzleslib_sbm.client.config.ConfigScreen;
-import com.fuzs.puzzleslib_sbm.config.ConfigManager;
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import com.fuzs.puzzleslib_sbm.element.ElementRegistry;
 import com.fuzs.swordblockingmechanics.element.CombatTestElement;
 import com.fuzs.swordblockingmechanics.element.SwordBlockingElement;
-import net.minecraftforge.fml.ExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,11 +22,7 @@ public class SwordBlockingMechanics extends PuzzlesLib {
 
     public SwordBlockingMechanics() {
 
-        ElementRegistry.setup(MODID);
-        ConfigManager.get().load();
-        getProxy().addGuiFactory(MODID);
-
-        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (client, parent) -> new ConfigScreen(parent, MODID, NAME));
+        ElementRegistry.setup(MODID, true);
     }
 
 }

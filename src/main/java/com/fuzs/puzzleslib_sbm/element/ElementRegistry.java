@@ -9,7 +9,6 @@ import com.fuzs.puzzleslib_sbm.element.side.ISidedElement;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.config.ModConfig;
@@ -17,8 +16,11 @@ import net.minecraftforge.fml.event.lifecycle.ParallelDispatchEvent;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -28,10 +30,6 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ElementRegistry {
 
-    /**
-     * empty element needed when adding config entries to {@link com.fuzs.puzzleslib_sbm.config.ConfigManager} manually
-     */
-    public static final AbstractElement EMPTY = AbstractElement.createEmpty(new ResourceLocation(PuzzlesLib.MODID, "empty"));
     /**
      * general storage for elements of all mods for performing actions on all of them
      */
@@ -155,66 +153,53 @@ public class ElementRegistry {
     }
 
     /**
-     * generate general config section for controlling elements, setup individual config sections and collect events to be registered in {@link #load}
-     * @param namespace namespace of active mod
+     * run code depending on element side type
+     * @param common consumer if implements {@link ICommonElement}
+     * @param client consumer if implements {@link IClientElement}
+     * @param server consumer if implements {@link IServerElement}
      */
-    public static void setup(String namespace) {
+    public static void loadSides(AbstractElement element, Consumer<ICommonElement> common, Consumer<IClientElement> client, Consumer<IServerElement> server) {
 
-        assert !MOD_ELEMENTS.isEmpty() : "Unable to setup elements for " + namespace + ": " + "No elements registered";
+        if (element instanceof ICommonElement) {
+
+            common.accept(((ICommonElement) element));
+        }
+
+        if (FMLEnvironment.dist.isClient() && element instanceof IClientElement) {
+
+            client.accept(((IClientElement) element));
+        }
+
+        if (FMLEnvironment.dist.isDedicatedServer() && element instanceof IServerElement) {
+
+            server.accept(((IServerElement) element));
+        }
+    }
+
+    /**
+     * generate general config section for controlling elements, setup individual config sections and collect events to be registered in {@link #load}
+     * @param modId mod id of active mod
+     * @param config should config files be created
+     * @param path optional directory inside of main config dir
+     */
+    public static void setup(String modId, boolean config, String... path) {
+
+        assert !MOD_ELEMENTS.isEmpty() : "Unable to setup elements for " + modId + ": " + "No elements registered";
 
         // add to main elements storage
         for (Map.Entry<String, AbstractElement> entry : MOD_ELEMENTS.entrySet()) {
 
-            ResourceLocation elementName = new ResourceLocation(namespace, entry.getKey());
+            ResourceLocation elementName = new ResourceLocation(modId, entry.getKey());
             ELEMENTS.put(elementName, entry.getValue().setRegistryName(elementName));
         }
 
-        setupGeneralSide(namespace, getElementsAtSide(MOD_ELEMENTS.values(), element -> element instanceof ICommonElement), ModConfig.Type.COMMON, FMLEnvironment.dist);
-        setupGeneralSide(namespace, getElementsAtSide(MOD_ELEMENTS.values(), element -> element instanceof IClientElement), ModConfig.Type.CLIENT, Dist.CLIENT);
-        setupGeneralSide(namespace, getElementsAtSide(MOD_ELEMENTS.values(), element -> element instanceof IServerElement), ModConfig.Type.SERVER, Dist.DEDICATED_SERVER);
+        if (config) {
 
-        getAllElements(namespace).forEach(AbstractElement::setup);
-    }
-
-    /**
-     * also clears elements from <code>elements</code>
-     * @param elements all elements for this mod
-     * @param isCurrentSide instanceof check for {@link com.fuzs.puzzleslib_sbm.element.side.ISidedElement}
-     * @return all elements for this mod for active side
-     */
-    private static Collection<AbstractElement> getElementsAtSide(Collection<AbstractElement> elements, Predicate<AbstractElement> isCurrentSide) {
-
-        Set<AbstractElement> elementsAtSide = Sets.newHashSet();
-        for (Iterator<AbstractElement> iterator = elements.iterator(); iterator.hasNext();) {
-
-            AbstractElement element = iterator.next();
-            if (isCurrentSide.test(element)) {
-
-                elementsAtSide.add(element);
-                iterator.remove();
-            }
+            ConfigManager.load(modId, MOD_ELEMENTS.values(), path);
         }
 
-        return elementsAtSide;
-    }
-
-    /**
-     * setup general section with control over individual elements for all config types
-     * @param namespace namespace of active mod
-     * @param elements all elements for this mod
-     * @param type config type to create general category for
-     * @param dist physical side this element can only be registered on
-     */
-    private static void setupGeneralSide(String namespace, Collection<AbstractElement> elements, ModConfig.Type type, Dist dist) {
-
-        if (!elements.isEmpty()) {
-
-            assert dist == FMLEnvironment.dist : "Unable to setup element: " + "Sided element registered on wrong side";
-
-            // create dummy element for config
-            AbstractElement general = AbstractElement.createEmpty(new ResourceLocation(namespace, "general"));
-            ConfigManager.builder().create(general, type, builder -> elements.forEach(element -> element.setupGeneralConfig(builder)));
-        }
+        MOD_ELEMENTS.values().forEach(AbstractElement::setup);
+        MOD_ELEMENTS.clear();
     }
 
     /**
@@ -222,10 +207,13 @@ public class ElementRegistry {
      * which sided elements to load is defined by provided event instance
      * loads all elements, no matter which mod they're from
      * @param evt event type
+     * @param syncType config option type to sync
      */
-    public static void load(ParallelDispatchEvent evt) {
+    public static void load(ParallelDispatchEvent evt, ModConfig.Type syncType) {
 
-        ELEMENTS.values().forEach(element -> element.load(evt));
+        Set<AbstractElement> elements = ELEMENTS.values();
+        ConfigManager.syncOptions(elements, syncType);
+        elements.forEach(element -> element.load(evt));
     }
 
 }

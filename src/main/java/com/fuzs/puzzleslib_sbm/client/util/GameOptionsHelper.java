@@ -1,8 +1,5 @@
 package com.fuzs.puzzleslib_sbm.client.util;
 
-import com.fuzs.puzzleslib_sbm.config.ConfigManager;
-import com.fuzs.puzzleslib_sbm.config.data.ConfigData;
-import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import com.fuzs.swordblockingmechanics.mixin.client.accessor.IOptionSliderAccessor;
 import net.minecraft.client.AbstractOption;
 import net.minecraft.client.Minecraft;
@@ -12,33 +9,11 @@ import net.minecraft.client.gui.widget.OptionSlider;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.OptionButton;
 import net.minecraft.client.gui.widget.list.OptionsRowList;
-import net.minecraft.client.settings.IteratableOption;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.ListIterator;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class GameOptionsHelper {
-
-//    public static <S extends ForgeConfigSpec.ConfigValue<T>, T, R> IteratableOption createGameOption(AbstractElement element, String path, String translationKeyIn, BiFunction<Integer, T, T> setter, Function<R, String> resourceKey) {
-//
-//        Optional<ConfigData<S, T, R>> optionValue = ConfigManager.get().getConfigData(element, path);
-//        if (optionValue.isPresent()) {
-//
-//            ConfigData<S, T, R> data = optionValue.get();
-//            return new IteratableOption(translationKeyIn, (settings, optionValues) -> data.modify(value -> setter.apply(optionValues, value)), (settings, optionValues) -> {
-//
-//                ConfigManager.get().getConfigComment(element, path).ifPresent(comment -> optionValues.setOptionValues(Minecraft.getInstance().fontRenderer.trimStringToWidth(new StringTextComponent(comment), 200)));
-//                return new TranslationTextComponent("options.generic_value", new TranslationTextComponent(translationKeyIn), new TranslationTextComponent(resourceKey.apply(data.get())));
-//            });
-//        }
-//
-//        return null;
-//    }
 
     public static void addOptionToScreen(Screen screen, AbstractOption option) {
 
@@ -90,7 +65,7 @@ public class GameOptionsHelper {
             if (currentRow.getEventListeners().size() == 1) {
 
                 IGuiEventListener listener = currentRow.getEventListeners().get(0);
-                // all buttons with two in once row will have this size
+                // all buttons with two in one row will have this size
                 if (((Widget) listener).getWidth() == 150 && (listener instanceof OptionButton || listener instanceof OptionSlider)) {
 
                     AbstractOption option;

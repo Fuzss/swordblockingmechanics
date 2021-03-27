@@ -4,6 +4,7 @@ import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 
+import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
 public class OptionsBuilder {
@@ -11,6 +12,7 @@ public class OptionsBuilder {
     private final ForgeConfigSpec.Builder builder;
     private final ModConfig.Type type;
     private AbstractElement activeElement;
+    private ConfigOption.ConfigOptionBuilder<?> activeOptionBuilder;
 
     public OptionsBuilder(ModConfig.Type type) {
 
@@ -18,10 +20,15 @@ public class OptionsBuilder {
         this.type = type;
     }
 
+    public OptionsBuilder comment(String... comment) {
+
+        this.builder.comment(comment);
+        return this;
+    }
+
     public OptionsBuilder push(AbstractElement element) {
 
         assert this.activeElement == null : "Unable to push element on builder: " + "Element already set";
-
         this.activeElement = element;
         this.builder.push(element.getRegistryName().getPath());
 
@@ -30,6 +37,7 @@ public class OptionsBuilder {
 
     public OptionsBuilder push(String path) {
 
+        this.tryCreate(null);
         this.builder.push(path);
         return this;
     }
@@ -37,11 +45,16 @@ public class OptionsBuilder {
     public OptionsBuilder pop(AbstractElement element) {
 
         assert element == this.activeElement : "Unable to pop element from builder: " + "No element set";
-        return this.pop();
+
+        this.pop();
+        this.activeElement = null;
+
+        return this;
     }
 
     public OptionsBuilder pop() {
 
+        this.tryCreate(null);
         this.builder.pop();
         return this;
     }
@@ -53,15 +66,27 @@ public class OptionsBuilder {
 
     public BooleanOption.BooleanOptionBuilder define(String name, boolean defaultValue) {
 
-        return new BooleanOption.BooleanOptionBuilder(this, name, defaultValue);
+        return this.tryCreate(new BooleanOption.BooleanOptionBuilder(this, name, defaultValue));
     }
 
     public IntegerOption.IntegerOptionBuilder define(String name, int defaultValue) {
 
-        return new IntegerOption.IntegerOptionBuilder(this, name, defaultValue);
+        return this.tryCreate(new IntegerOption.IntegerOptionBuilder(this, name, defaultValue));
     }
 
-    <T> OptionsBuilder create(ConfigOption.ConfigOptionBuilder<T> builder) {
+    @Nullable
+    private <T extends ConfigOption.ConfigOptionBuilder<?>> T tryCreate(@Nullable T builder) {
+
+        if (this.activeOptionBuilder != null) {
+
+            this.create(this.activeOptionBuilder);
+        }
+
+        this.activeOptionBuilder = builder;
+        return builder;
+    }
+
+    private <T> void create(ConfigOption.ConfigOptionBuilder<T> builder) {
 
         if (builder.comment.length != 0) {
 
@@ -72,8 +97,6 @@ public class OptionsBuilder {
         ForgeConfigSpec.ConfigValue<T> configValue = builder.getConfigValue(this.builder);
         ConfigOption<T> option = factory.apply(configValue, this.type);
         this.activeElement.addOption(option);
-
-        return this;
     }
 
 }

@@ -2,27 +2,26 @@ package com.fuzs.puzzleslib_sbm.element;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
 import com.fuzs.puzzleslib_sbm.config.implementation.ConfigOption;
+import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.side.IClientElement;
 import com.fuzs.puzzleslib_sbm.element.side.ICommonElement;
 import com.fuzs.puzzleslib_sbm.element.side.IServerElement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.ParallelDispatchEvent;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -105,9 +104,9 @@ public abstract class AbstractElement extends EventListener implements IConfigur
     }
 
     @Override
-    public final void setupGeneralConfig(ForgeConfigSpec.Builder builder) {
+    public final void setupGeneralConfig(OptionsBuilder builder) {
 
-        addToConfig(builder.comment(this.getDescription()).define(this.getDisplayName(), this.getDefaultState()), this::setEnabled);
+        builder.define(this.getDisplayName(), this.getDefaultState()).comment(this.getDescription()).sync(this::setEnabled);
     }
 
     /**
@@ -115,30 +114,7 @@ public abstract class AbstractElement extends EventListener implements IConfigur
      */
     public final void setup() {
 
-        this.loadAllSides(ICommonElement::setupCommon, IClientElement::setupClient, IServerElement::setupServer);
-    }
-
-    /**
-     * @param common consumer if implements {@link ICommonElement}
-     * @param client consumer if implements {@link IClientElement}
-     * @param server consumer if implements {@link IServerElement}
-     */
-    private void loadAllSides(Consumer<ICommonElement> common, Consumer<IClientElement> client, Consumer<IServerElement> server) {
-
-        if (this instanceof ICommonElement) {
-
-            common.accept(((ICommonElement) this));
-        }
-
-        if (FMLEnvironment.dist.isClient() && this instanceof IClientElement) {
-
-            client.accept(((IClientElement) this));
-        }
-
-        if (FMLEnvironment.dist.isDedicatedServer() && this instanceof IServerElement) {
-
-            server.accept(((IServerElement) this));
-        }
+        ElementRegistry.loadSides(this, ICommonElement::setupCommon, IClientElement::setupClient, IServerElement::setupServer);
     }
 
     /**
@@ -198,7 +174,7 @@ public abstract class AbstractElement extends EventListener implements IConfigur
         } else if (!firstLoad) {
 
             this.reloadEventListeners(false);
-            this.loadAllSides(ICommonElement::unloadCommon, IClientElement::unloadClient, IServerElement::unloadServer);
+            ElementRegistry.loadSides(this, ICommonElement::unloadCommon, IClientElement::unloadClient, IServerElement::unloadServer);
         }
     }
 
@@ -294,6 +270,11 @@ public abstract class AbstractElement extends EventListener implements IConfigur
     public final <T> Optional<T> getValue(String... path) {
 
         return (Optional<T>) this.getOption().map(ConfigOption::get);
+    }
+
+    public Collection<ConfigOption<?>> getOptions() {
+
+        return this.configOptions.values();
     }
 
     /**

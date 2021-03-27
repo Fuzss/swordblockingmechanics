@@ -41,9 +41,9 @@ public class ConfigOption<T> {
         return this.value.get();
     }
 
-    public ModConfig.Type getType() {
+    public boolean isType(ModConfig.Type type) {
 
-        return this.type;
+        return this.type == type;
     }
 
     public List<String> getPath() {
@@ -145,11 +145,6 @@ public class ConfigOption<T> {
         abstract BiFunction<ForgeConfigSpec.ConfigValue<T>, ModConfig.Type, ConfigOption<T>> getFactory();
 
         abstract ForgeConfigSpec.ConfigValue<T> getConfigValue(ForgeConfigSpec.Builder builder);
-
-        public final OptionsBuilder next() {
-
-            return this.builder.create(this);
-        }
 
     }
 

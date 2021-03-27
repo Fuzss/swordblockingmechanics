@@ -120,7 +120,7 @@ class ConfigTypeData {
     String getFileName(ModLoadingContext context) {
 
         String modId = context.getActiveContainer().getModId();
-        return this.path + ConfigManager.getConfigName(modId, this.type);
+        return this.path + ConfigManager.getFileName(modId, this.type);
     }
 
 }

@@ -64,13 +64,13 @@ public class CombatTestElement extends ClientExtensibleElement<CombatTestExtensi
     @Override
     public void setupCommonConfig(OptionsBuilder builder) {
 
-        builder.define("Increase Stack Size", true).comment("Increase snowball and egg stack size from 16 to 64, and potion stack size from 1 to 16.").sync(this::setMaxStackSize)
-                .next().define("Throwables Delay", true).comment("Add a delay of 4 ticks between throwing snowballs or eggs, just like with ender pearls.").sync(v -> this.throwablesDelay = v)
-                .next().define("Eating Interruption", true).comment("Eating and drinking both are interrupted if the player receives damage.").sync(v -> this.eatingInterruption = v)
-                .next().define("Remove Shield Delay", true).comment("Skip 5 tick warm-up delay when activating a shield.").sync(v -> this.noShieldDelay = v)
-                .next().define("Pass-Through Throwables", true).comment("Throwables such as snowballs, eggs and ender pearls pass through blocks without a collision shape like grass and flowers.").sync(v -> this.passThroughThrowables = v)
-                .next().define("Fast Tool Switching", true).comment("Attack cooldown is unaffected by switching items.").sync(v -> this.fastSwitching = v)
-                .next().define("Fast Drinking", true).comment("It only takes 20 ticks to drink liquid foods instead of 32 or 40.").sync(v -> this.fastDrinking = v);
+        builder.define("Increase Stack Size", true).comment("Increase snowball and egg stack size from 16 to 64, and potion stack size from 1 to 16.").sync(this::setMaxStackSize);
+        builder.define("Throwables Delay", true).comment("Add a delay of 4 ticks between throwing snowballs or eggs, just like with ender pearls.").sync(v -> this.throwablesDelay = v);
+        builder.define("Eating Interruption", true).comment("Eating and drinking both are interrupted if the player receives damage.").sync(v -> this.eatingInterruption = v);
+        builder.define("Remove Shield Delay", true).comment("Skip 5 tick warm-up delay when activating a shield.").sync(v -> this.noShieldDelay = v);
+        builder.define("Pass-Through Throwables", true).comment("Throwables such as snowballs, eggs and ender pearls pass through blocks without a collision shape like grass and flowers.").sync(v -> this.passThroughThrowables = v);
+        builder.define("Fast Tool Switching", true).comment("Attack cooldown is unaffected by switching items.").sync(v -> this.fastSwitching = v);
+        builder.define("Fast Drinking", true).comment("It only takes 20 ticks to drink liquid foods instead of 32 or 40.").sync(v -> this.fastDrinking = v);
     }
 
     private void onProjectileImpact(final ProjectileImpactEvent evt) {

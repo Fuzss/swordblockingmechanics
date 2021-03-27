@@ -1,6 +1,7 @@
 package com.fuzs.puzzleslib_sbm.element;
 
 import com.fuzs.puzzleslib_sbm.config.implementation.ConfigOption;
+import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.Optional;
@@ -34,7 +35,7 @@ public interface IConfigurableElement {
      * add an entry for controlling this element in the general config section
      * @param builder active config builder
      */
-    void setupGeneralConfig(ForgeConfigSpec.Builder builder);
+    void setupGeneralConfig(OptionsBuilder builder);
 
     /**
      * add config option from inside {@link com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder}
