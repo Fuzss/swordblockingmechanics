@@ -13,6 +13,7 @@ import net.minecraft.client.gui.widget.list.OptionsRowList;
 import java.util.ListIterator;
 import java.util.Optional;
 
+@SuppressWarnings("unused")
 public class GameOptionsHelper {
 
     public static void addOptionToScreen(Screen screen, AbstractOption option) {

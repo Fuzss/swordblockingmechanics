@@ -8,6 +8,7 @@ import com.fuzs.puzzleslib_sbm.config.serialization.EntryCollectionBuilder;
 import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import com.fuzs.puzzleslib_sbm.element.side.ISidedElement;
 import com.fuzs.puzzleslib_sbm.util.INamespaceLocator;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -33,11 +34,12 @@ public class ConfigManager implements INamespaceLocator {
      * fires on both loading and reloading, loading phase is required for initial setup
      * @param evt event provided by Forge
      */
-    private static void onModConfig(final ModConfig.ModConfigEvent evt, AbstractElement generalElement, Collection<AbstractElement> allElements) {
+    private static void onModConfig(final ModConfig.ModConfigEvent evt, Collection<AbstractElement> generalElement, Collection<AbstractElement> allElements) {
 
         // separate general element so we don't sync when element has been disabled just now
-        generalElement.getOptions().forEach(ConfigOption::sync);
-        syncOptions(allElements, evt.getConfig().getType(), evt instanceof ModConfig.Reloading);
+        ModConfig.Type type = evt.getConfig().getType();
+        getAllOptions(generalElement, type, false).forEach(ConfigOption::sync);
+        syncOptions(allElements, type, evt instanceof ModConfig.Reloading);
     }
 
     /**
@@ -65,10 +67,10 @@ public class ConfigManager implements INamespaceLocator {
                 ISidedElement.setupConfig(optionsBuilder, type, element);
             }
 
-            ModLoadingContext.get().registerConfig(type, optionsBuilder.build(), fileName.apply(type));
+            optionsBuilder.build().ifPresent(spec -> ModLoadingContext.get().registerConfig(type, spec, fileName.apply(type)));
         }
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((ModConfig.ModConfigEvent evt) -> onModConfig(evt, generalElement, allElements));
+        FMLJavaModLoadingContext.get().getModEventBus().addListener((ModConfig.ModConfigEvent evt) -> onModConfig(evt, ImmutableSet.of(generalElement), allElements));
     }
 
     /**
@@ -97,28 +99,32 @@ public class ConfigManager implements INamespaceLocator {
      */
     public static void syncOptions(Collection<AbstractElement> elements, ModConfig.Type type) {
 
-        syncOptions(elements, type, true);
+        syncOptions(elements, type, false);
     }
 
     /**
      * sync config entries for specific type of config
      * call listeners for type as the config has somehow been loaded
-     * @param elements all elements for relevant mod
+     * @param allElements all allElements for relevant mod
      * @param type config type for this listener
      */
-    private static void syncOptions(Collection<AbstractElement> elements, ModConfig.Type type, boolean log) {
+    private static void syncOptions(Collection<AbstractElement> allElements, ModConfig.Type type, boolean log) {
 
-        Collection<ConfigOption<?>> options = getAllOptions(elements, type, true);
+        Collection<ConfigOption<?>> options = getAllOptions(allElements, type, true);
         if (!options.isEmpty()) {
 
             options.forEach(ConfigOption::sync);
-            if (log) {
+        }
 
-                PuzzlesLib.LOGGER.info("Reloaded " + type.extension() + " config options for " + elements.stream()
-                        .map(AbstractElement::getRegistryName)
-                        .map(ResourceLocation::toString)
-                        .collect(Collectors.joining(", ")));
-            }
+        if (log) {
+
+            String elementsString = allElements.stream()
+                    .filter(AbstractElement::isEnabled)
+                    .map(AbstractElement::getRegistryName)
+                    .map(ResourceLocation::toString)
+                    .collect(Collectors.joining(", "));
+
+            PuzzlesLib.LOGGER.info("Reloaded " + type.extension() + " config options for " + (options.isEmpty() ? "no elements" : elementsString));
         }
     }
 

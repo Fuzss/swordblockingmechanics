@@ -4,7 +4,7 @@ import com.fuzs.puzzleslib_sbm.element.AbstractElement;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
@@ -14,6 +14,7 @@ public class OptionsBuilder {
     private final ModConfig.Type type;
     private AbstractElement activeElement;
     private ConfigOption.ConfigOptionBuilder<?> activeOptionBuilder;
+    private int useCounter;
 
     public OptionsBuilder(ModConfig.Type type) {
 
@@ -38,7 +39,7 @@ public class OptionsBuilder {
 
     public OptionsBuilder push(String path) {
 
-        this.tryCreate(null);
+        this.tryCreateLast();
         this.builder.push(path);
         return this;
     }
@@ -55,59 +56,65 @@ public class OptionsBuilder {
 
     public OptionsBuilder pop() {
 
-        this.tryCreate(null);
+        this.tryCreateLast();
         this.builder.pop();
         return this;
     }
 
-    public ForgeConfigSpec build() {
+    public Optional<ForgeConfigSpec> build() {
 
-        return this.builder.build();
+        // never create an empty spec
+        return this.useCounter > 0 ? Optional.of(this.builder.build()) : Optional.empty();
     }
 
     public StringOption.StringOptionBuilder define(String optionName, String defaultValue) {
 
-        return this.tryCreate(new StringOption.StringOptionBuilder(optionName, defaultValue));
+        return this.setBuilder(new StringOption.StringOptionBuilder(optionName, defaultValue));
     }
 
     public BooleanOption.BooleanOptionBuilder define(String optionName, boolean defaultValue) {
 
-        return this.tryCreate(new BooleanOption.BooleanOptionBuilder(optionName, defaultValue));
+        return this.setBuilder(new BooleanOption.BooleanOptionBuilder(optionName, defaultValue));
     }
 
     public IntegerOption.IntegerOptionBuilder define(String optionName, int defaultValue) {
 
-        return this.tryCreate(new IntegerOption.IntegerOptionBuilder(optionName, defaultValue));
+        return this.setBuilder(new IntegerOption.IntegerOptionBuilder(optionName, defaultValue));
     }
 
     public LongOption.LongOptionBuilder define(String optionName, long defaultValue) {
 
-        return this.tryCreate(new LongOption.LongOptionBuilder(optionName, defaultValue));
+        return this.setBuilder(new LongOption.LongOptionBuilder(optionName, defaultValue));
     }
 
     public DoubleOption.DoubleOptionBuilder define(String optionName, double defaultValue) {
 
-        return this.tryCreate(new DoubleOption.DoubleOptionBuilder(optionName, defaultValue));
+        return this.setBuilder(new DoubleOption.DoubleOptionBuilder(optionName, defaultValue));
     }
 
     public <T extends Enum<T>> EnumOption.EnumOptionBuilder<T> define(String optionName, T defaultValue) {
 
-        return this.tryCreate(new EnumOption.EnumOptionBuilder<>(optionName, defaultValue));
+        return this.setBuilder(new EnumOption.EnumOptionBuilder<>(optionName, defaultValue));
     }
 
-    @Nullable
-    private <T extends ConfigOption.ConfigOptionBuilder<?>> T tryCreate(@Nullable T optionBuilder) {
+    private <T extends ConfigOption.ConfigOptionBuilder<?>> T setBuilder(T optionBuilder) {
 
-        if (this.activeOptionBuilder != null) {
-
-            this.create(this.activeOptionBuilder);
-        }
-
+        this.tryCreateLast();
+        this.useCounter++;
         this.activeOptionBuilder = optionBuilder;
+
         return optionBuilder;
     }
 
-    private <T> void create(ConfigOption.ConfigOptionBuilder<T> builder) {
+    private void tryCreateLast() {
+
+        if (this.activeOptionBuilder != null) {
+
+            this.createOption(this.activeOptionBuilder);
+        }
+    }
+
+    private <T> void createOption(ConfigOption.ConfigOptionBuilder<T> builder) {
 
         if (builder.comment.length != 0) {
 

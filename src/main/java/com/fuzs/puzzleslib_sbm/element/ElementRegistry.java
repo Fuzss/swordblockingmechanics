@@ -8,6 +8,7 @@ import com.fuzs.puzzleslib_sbm.element.side.IServerElement;
 import com.fuzs.puzzleslib_sbm.element.side.ISidedElement;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -172,8 +173,8 @@ public class ElementRegistry {
 
             // create dummy element for general config section
             AbstractElement generalElement = AbstractElement.createEmpty(new ResourceLocation(modId, "general"));
-            ConfigManager.load(generalElement, MOD_ELEMENTS.values(), type -> ConfigManager.getFileName(modId, type, path));
-            // add general option to storage so it can be reloaded
+            ConfigManager.load(generalElement, ImmutableSet.copyOf(MOD_ELEMENTS.values()), type -> ConfigManager.getFileName(modId, type, path));
+            // add general option to storage so it can be reloaded during load phase
             ELEMENTS.put(generalElement.getRegistryName(), generalElement);
         }
 
