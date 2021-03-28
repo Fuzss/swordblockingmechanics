@@ -111,6 +111,7 @@ public class OptionsBuilder {
         if (this.activeOptionBuilder != null) {
 
             this.createOption(this.activeOptionBuilder);
+            this.activeOptionBuilder = null;
         }
     }
 
