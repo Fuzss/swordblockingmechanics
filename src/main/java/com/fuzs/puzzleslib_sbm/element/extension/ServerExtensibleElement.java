@@ -1,8 +1,8 @@
 package com.fuzs.puzzleslib_sbm.element.extension;
 
-import com.fuzs.puzzleslib_sbm.config.implementation.OptionsBuilder;
 import com.fuzs.puzzleslib_sbm.element.side.IServerElement;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.function.Function;
 
@@ -39,7 +39,7 @@ public abstract class ServerExtensibleElement<T extends ElementExtension<?> & IS
     }
 
     @Override
-    public final void setupServerConfig(OptionsBuilder builder) {
+    public final void setupServerConfig(ForgeConfigSpec.Builder builder) {
 
         this.extension.setupServerConfig(builder);
     }

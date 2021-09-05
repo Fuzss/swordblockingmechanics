@@ -46,6 +46,10 @@ public class ConfigManager implements INamespaceLocator {
      * all config entries as a set
      */
     private final Multimap<AbstractElement, IConfigData<?, ?>> configData = HashMultimap.create();
+    /**
+     * listeners to call when a config is somehow loaded
+     */
+    private final Set<ReloadListener> reloadListeners = Sets.newHashSet();
 
     /**
      * this class is a singleton
@@ -164,6 +168,94 @@ public class ConfigManager implements INamespaceLocator {
     }
 
     /**
+     * @param element element this data belongs to
+     * @param path individual parts of path for config value
+     * @return the config value
+     */
+    public <T> Optional<T> getConfigValue(AbstractElement element, String... path) {
+
+        if (element.isEnabled()) {
+
+            return this.<ForgeConfigSpec.ConfigValue<Object>, Object, T>getConfigData(element, path)
+                    .map(ConfigData::get);
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * @param element element this data belongs to
+     * @param path individual parts of path for config value
+     * @return config data
+     */
+    @SuppressWarnings("unchecked")
+    public <S extends ForgeConfigSpec.ConfigValue<T>, T, R> Optional<ConfigData<S, T, R>> getConfigData(AbstractElement element, String... path) {
+
+        String singlePath = concatConfigPath(element, path);
+        for (IConfigData<?, ?> data : this.configData.get(element)) {
+
+            if (data.isAtPath(singlePath)) {
+
+                return Optional.of((ConfigData<S, T, R>) data);
+            }
+        }
+
+        PuzzlesLib.LOGGER.error("Unable to get config value at path \"" + singlePath + "\": " + "No config value found");
+        return Optional.empty();
+    }
+
+    /**
+     * register config entry on both client and server
+     * @param entry source config value object
+     * @param action action to perform when value changes (is reloaded)
+     * @param <S> config value of a certain type
+     * @param <T> type for value
+     */
+    public <S extends ForgeConfigSpec.ConfigValue<T>, T> void registerCommonEntry(S entry, Consumer<T> action) {
+
+        this.registerEntry(entry, ModConfig.Type.COMMON, action, Function.identity());
+    }
+
+    /**
+     * register config entry on the client
+     * @param entry source config value object
+     * @param action action to perform when value changes (is reloaded)
+     * @param <S> config value of a certain type
+     * @param <T> type for value
+     */
+    public <S extends ForgeConfigSpec.ConfigValue<T>, T> void registerClientEntry(S entry, Consumer<T> action) {
+
+        this.registerEntry(entry, ModConfig.Type.CLIENT, action, Function.identity());
+    }
+
+    /**
+     * register config entry on the server
+     * @param entry source config value object
+     * @param action action to perform when value changes (is reloaded)
+     * @param <S> config value of a certain type
+     * @param <T> type for value
+     */
+    public <S extends ForgeConfigSpec.ConfigValue<T>, T> void registerServerEntry(S entry, Consumer<T> action) {
+
+        this.registerEntry(entry, ModConfig.Type.SERVER, action, Function.identity());
+    }
+
+    /**
+     * register config entry for given type
+     * @param entry source config value object
+     * @param type type of config to register for
+     * @param action action to perform when value changes (is reloaded)
+     * @param transformer transformation to apply when returning value
+     * @param <S> config value of a certain type
+     * @param <T> type for value
+     * @param <R> final return type of config entry
+     */
+    private <S extends ForgeConfigSpec.ConfigValue<T>, T, R> void registerEntry(S entry, ModConfig.Type type, Consumer<R> action, Function<T, R> transformer) {
+
+        this.configData.put(ElementRegistry.EMPTY, create(entry, type, action, transformer));
+    }
+
+    /**
      * register config entry for active type
      * @param <S> config value of a certain type
      * @param <T> type for value
@@ -258,6 +350,18 @@ public class ConfigManager implements INamespaceLocator {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @param element element this option belongs to
+     * @param path path inside element
+     * @return full qualified path
+     */
+    public static String concatConfigPath(AbstractElement element, String... path) {
+
+        assert path.length != 0 : "Unable to get config value: " + "Invalid config path";
+
+        return Stream.concat(Stream.of(element.getRegistryName().getPath()), Stream.of(path)).collect(Collectors.joining("."));
+    }
+
     private static <S extends ForgeConfigSpec.ConfigValue<T>, T, R> IConfigData<?, ?> create(S configValue, ModConfig.Type configType, Consumer<R> syncToField, Function<T, R> transformValue) {
 
         if (FMLEnvironment.dist.isDedicatedServer()) {
@@ -315,6 +419,36 @@ public class ConfigManager implements INamespaceLocator {
     public static ConfigBuilder builder() {
 
         return get().getBuilder();
+    }
+
+    private static class ReloadListener {
+
+        private final String modId;
+        private final ModConfig.Type type;
+        private final Runnable onReload;
+
+        public ReloadListener(String modId, ModConfig.Type type, Runnable onReload) {
+
+            this.modId = modId;
+            this.type = type;
+            this.onReload = onReload;
+        }
+
+        boolean isModId(@Nullable String modId) {
+
+            return modId == null || this.modId.equals(modId);
+        }
+
+        boolean isType(ModConfig.Type type) {
+
+            return this.type == type;
+        }
+
+        void run() {
+
+            this.onReload.run();
+        }
+
     }
 
 }

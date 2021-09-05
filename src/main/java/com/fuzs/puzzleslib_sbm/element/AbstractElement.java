@@ -1,16 +1,16 @@
 package com.fuzs.puzzleslib_sbm.element;
 
 import com.fuzs.puzzleslib_sbm.PuzzlesLib;
-import com.fuzs.puzzleslib_sbm.config.implementation.ConfigOption;
+import com.fuzs.puzzleslib_sbm.config.ConfigManager;
 import com.fuzs.puzzleslib_sbm.element.side.IClientElement;
 import com.fuzs.puzzleslib_sbm.element.side.ICommonElement;
 import com.fuzs.puzzleslib_sbm.element.side.IServerElement;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
@@ -20,8 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,10 +43,6 @@ public abstract class AbstractElement extends EventListener implements IConfigur
      * all events registered by this element
      */
     private final List<EventStorage<? extends Event>> eventListeners = Lists.newArrayList();
-    /**
-     * config options for this element
-     */
-    private final Map<String, ConfigOption<?>> configOptions = Maps.newHashMap();
 
     @Nonnull
     @Override
@@ -88,10 +82,8 @@ public abstract class AbstractElement extends EventListener implements IConfigur
         return true;
     }
 
-    /**
-     * @return mods whose presence prevent this element from loading
-     */
-    protected String[] isIncompatibleWith() {
+    @Override
+    public String[] isIncompatibleWith() {
 
         return new String[0];
     }
@@ -115,7 +107,19 @@ public abstract class AbstractElement extends EventListener implements IConfigur
      */
     public final void setup() {
 
+        this.setupConfig();
         this.loadAllSides(ICommonElement::setupCommon, IClientElement::setupClient, IServerElement::setupServer);
+    }
+
+    /**
+     * setup config for all sides
+     */
+    private void setupConfig() {
+
+        Consumer<ICommonElement> commonConfig = element -> ConfigManager.builder().create(this, ModConfig.Type.COMMON, element::setupCommonConfig, element.getCommonDescription());
+        Consumer<IClientElement> clientConfig = element -> ConfigManager.builder().create(this, ModConfig.Type.CLIENT, element::setupClientConfig, element.getClientDescription());
+        Consumer<IServerElement> serverConfig = element -> ConfigManager.builder().create(this, ModConfig.Type.SERVER, element::setupServerConfig, element.getServerDescription());
+        this.loadAllSides(commonConfig, clientConfig, serverConfig);
     }
 
     /**
@@ -270,30 +274,10 @@ public abstract class AbstractElement extends EventListener implements IConfigur
     }
 
     @Override
-    public final void addOption(ConfigOption<?> option) {
+    public boolean equals(Object obj) {
 
-        this.configOptions.put(String.join(".", option.getPath()), option);
-    }
+        return obj == this || obj instanceof AbstractElement && ((AbstractElement) obj).getRegistryName().equals(this.getRegistryName());
 
-    @Override
-    public final Optional<ConfigOption<?>> getOption(String... path) {
-
-        String singlePath = String.join(".", path);
-        ConfigOption<?> option = this.configOptions.get(singlePath);
-        if (option != null) {
-
-            return Optional.of(option);
-        }
-
-        PuzzlesLib.LOGGER.error("Unable to get option at path \"" + singlePath + "\": " + "Option not found");
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public final <T> Optional<T> getValue(String... path) {
-
-        return (Optional<T>) this.getOption().map(ConfigOption::get);
     }
 
     /**
