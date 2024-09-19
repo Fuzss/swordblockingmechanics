@@ -29,6 +29,13 @@ public class ParryCooldownCapabilityImpl implements ParryCooldownCapability {
 
     @Override
     public void tick(Player player) {
+        if(this.cooldownTicks <0){
+            this.cooldownTicks = 0;
+        }else {
+            if (SwordBlockingHandler.isActiveItemStackBlocking(this.player) && getCooldownProgress() < 1.0){
+                this.cooldownTicks += 1;
+            }
+        }
         if (this.cooldownTicks > 0 && !SwordBlockingHandler.isActiveItemStackBlocking(this.player)) this.cooldownTicks -= 2;
     }
 }
