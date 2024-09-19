@@ -22,6 +22,13 @@ public class ParryCooldownCapability extends CapabilityComponent<Player> {
     }
 
     public void tick() {
+        if(this.cooldownTicks < 0){
+            this.cooldownTicks = 0;
+        }else {
+            if (SwordBlockingHandler.SwordBlockingHandler.isActiveItemStackBlocking(this.getHolder()) && getCooldownProgress() < 1.0){
+                this.setCooldownTicks(this.cooldownTicks + 1);
+            }
+        }
         if (this.cooldownTicks > 0 && !SwordBlockingHandler.isActiveItemStackBlocking(this.getHolder())) {
             this.setCooldownTicks(this.cooldownTicks - 2);
         }
