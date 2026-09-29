@@ -8,6 +8,6 @@ dependencies {
 
 multiloader {
     mixins {
-        clientMixin("HumanoidModelMixin", "ItemInHandRendererMixin", "PlayerItemInHandLayerMixin")
+        clientMixin("FirstPersonHandsAndItemsMixin", "HumanoidModelMixin", "PlayerItemInHandLayerMixin")
     }
 }

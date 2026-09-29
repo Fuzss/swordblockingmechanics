@@ -1,7 +1,7 @@
 package fuzs.swordblockingmechanics.neoforge.client;
 
 import fuzs.puzzleslib.common.api.client.core.v1.ClientModConstructor;
-import fuzs.puzzleslib.neoforge.api.data.v2.core.DataProviderHelper;
+import fuzs.puzzleslib.neoforge.api.data.v3.core.DataProviderBuilder;
 import fuzs.swordblockingmechanics.common.SwordBlockingMechanics;
 import fuzs.swordblockingmechanics.common.client.SwordBlockingMechanicsClient;
 import fuzs.swordblockingmechanics.common.data.client.ModLanguageProvider;
@@ -14,7 +14,7 @@ public class SwordBlockingMechanicsNeoForgeClient {
 
     public SwordBlockingMechanicsNeoForgeClient() {
         ClientModConstructor.construct(SwordBlockingMechanics.MOD_ID, SwordBlockingMechanicsClient::new);
-        DataProviderHelper.registerDataProviders(SwordBlockingMechanics.MOD_ID, ModLanguageProvider::new,
+        DataProviderBuilder.of(SwordBlockingMechanics.MOD_ID).addProvider(ModLanguageProvider::new,
                 ModSoundDefinitionProvider::new
         );
     }

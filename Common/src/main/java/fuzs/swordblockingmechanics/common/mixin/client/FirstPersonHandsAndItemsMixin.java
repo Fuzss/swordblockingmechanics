@@ -2,26 +2,23 @@ package fuzs.swordblockingmechanics.common.mixin.client;
 
 import fuzs.swordblockingmechanics.common.init.ModRegistry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.player.FirstPersonHandsAndItems;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ItemInHandRenderer.class)
-abstract class ItemInHandRendererMixin {
-    @Shadow
-    @Final
-    private Minecraft minecraft;
+@Mixin(FirstPersonHandsAndItems.class)
+abstract class FirstPersonHandsAndItemsMixin {
 
     @Inject(method = "itemUsed", at = @At("HEAD"), cancellable = true)
     public void itemUsed(InteractionHand hand, CallbackInfo callback) {
         // Don't play the re-equip animation when beginning to use an item, like shield or bow.
-        if (this.minecraft.player.isUsingItem() && this.minecraft.player.getUsedItemHand() == hand) {
-            if (this.minecraft.player.getUseItem().is(ModRegistry.CAN_PERFORM_SWORD_BLOCKING_ITEM_TAG)) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player.isUsingItem() && player.getUsedItemHand() == hand) {
+            if (player.getUseItem().is(ModRegistry.CAN_PERFORM_SWORD_BLOCKING_ITEM_TAG)) {
                 callback.cancel();
             }
         }

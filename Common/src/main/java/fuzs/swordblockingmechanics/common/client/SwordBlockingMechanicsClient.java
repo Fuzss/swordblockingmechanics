@@ -5,7 +5,7 @@ import fuzs.puzzleslib.common.api.client.core.v1.context.GuiLayersContext;
 import fuzs.puzzleslib.common.api.client.event.v1.ClientTickEvents;
 import fuzs.puzzleslib.common.api.client.event.v1.gui.RenderGuiEvents;
 import fuzs.puzzleslib.common.api.client.event.v1.renderer.ExtractEntityRenderStateCallback;
-import fuzs.puzzleslib.common.api.client.event.v1.renderer.RenderHandEvents;
+import fuzs.puzzleslib.common.api.client.event.v1.renderer.SubmitArmWithItemCallback;
 import fuzs.swordblockingmechanics.common.SwordBlockingMechanics;
 import fuzs.swordblockingmechanics.common.client.handler.AttackIndicatorInGuiHandler;
 import fuzs.swordblockingmechanics.common.client.handler.FirstPersonRenderingHandler;
@@ -20,7 +20,7 @@ public class SwordBlockingMechanicsClient implements ClientModConstructor {
     private static void registerEventHandlers() {
         RenderGuiEvents.BEFORE.register(AttackIndicatorInGuiHandler::onBeforeRenderGui);
         RenderGuiEvents.AFTER.register(AttackIndicatorInGuiHandler::onAfterRenderGui);
-        RenderHandEvents.BOTH.register(FirstPersonRenderingHandler::onRenderBothHands);
+        SubmitArmWithItemCallback.EVENT.register(FirstPersonRenderingHandler::onSubmitArmWithItem);
         ExtractEntityRenderStateCallback.EVENT.register(FirstPersonRenderingHandler::onExtractEntityRenderState);
         ClientTickEvents.END.register(AttackIndicatorInGuiHandler::onEndClientTick);
     }

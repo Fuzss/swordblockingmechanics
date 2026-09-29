@@ -1,7 +1,7 @@
 package fuzs.swordblockingmechanics.common.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import fuzs.puzzleslib.common.api.client.renderer.v1.RenderStateExtraData;
+import fuzs.puzzleslib.common.api.client.renderer.v2.RenderStateExtraData;
 import fuzs.swordblockingmechanics.common.SwordBlockingMechanics;
 import fuzs.swordblockingmechanics.common.client.handler.FirstPersonRenderingHandler;
 import fuzs.swordblockingmechanics.common.client.helper.AdvancedBlockingRenderer;

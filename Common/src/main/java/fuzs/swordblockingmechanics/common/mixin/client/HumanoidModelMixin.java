@@ -1,6 +1,6 @@
 package fuzs.swordblockingmechanics.common.mixin.client;
 
-import fuzs.puzzleslib.common.api.client.renderer.v1.RenderStateExtraData;
+import fuzs.puzzleslib.common.api.client.renderer.v2.RenderStateExtraData;
 import fuzs.swordblockingmechanics.common.SwordBlockingMechanics;
 import fuzs.swordblockingmechanics.common.client.handler.FirstPersonRenderingHandler;
 import fuzs.swordblockingmechanics.common.config.ClientConfig;

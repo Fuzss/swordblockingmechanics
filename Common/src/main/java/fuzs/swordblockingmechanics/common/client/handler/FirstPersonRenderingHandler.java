@@ -2,22 +2,25 @@ package fuzs.swordblockingmechanics.common.client.handler;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import fuzs.puzzleslib.common.api.client.renderer.v1.RenderStateExtraData;
+import fuzs.puzzleslib.common.api.client.renderer.v2.RenderStateExtraData;
 import fuzs.puzzleslib.common.api.event.v1.core.EventResult;
 import fuzs.swordblockingmechanics.common.SwordBlockingMechanics;
 import fuzs.swordblockingmechanics.common.config.ClientConfig;
 import fuzs.swordblockingmechanics.common.handler.SwordBlockingHandler;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.client.renderer.state.level.FirstPersonHandsAndItemsRenderState;
+import net.minecraft.client.renderer.state.level.PlayerRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 public class FirstPersonRenderingHandler {
@@ -32,23 +35,24 @@ public class FirstPersonRenderingHandler {
         }
     }
 
-    public static EventResult onRenderBothHands(ItemInHandRenderer itemInHandRenderer, InteractionHand interactionHand, AbstractClientPlayer player, HumanoidArm humanoidArm, ItemStack itemStack, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int combinedLight, float partialTick, float interpolatedPitch, float swingProgress, float equipProgress) {
-        if (player.getUsedItemHand() == interactionHand && SwordBlockingHandler.isActiveItemStackBlocking(player)) {
+    public static EventResult onSubmitArmWithItem(FirstPersonHandsAndItemsRenderer handsAndItemsRenderer, PlayerRenderState playerState, FirstPersonHandsAndItemsRenderState state, float partialTicks, float xRot, InteractionHand hand, float attack, ItemStack itemStack, float inverseArmHeight, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null && player.getUsedItemHand() == hand && SwordBlockingHandler.isActiveItemStackBlocking(
+                player)) {
+            HumanoidArm humanoidArm = hand == InteractionHand.MAIN_HAND ? player.getMainArm() :
+                    player.getMainArm().getOpposite();
             poseStack.pushPose();
-            boolean isHandSideRight = humanoidArm == HumanoidArm.RIGHT;
-            itemInHandRenderer.applyItemArmTransform(poseStack, humanoidArm, equipProgress);
+            handsAndItemsRenderer.applyItemArmTransform(poseStack, humanoidArm, inverseArmHeight);
             if (SwordBlockingMechanics.CONFIG.get(ClientConfig.class).interactAnimations) {
-                itemInHandRenderer.applyItemArmAttackTransform(poseStack, humanoidArm, swingProgress);
+                handsAndItemsRenderer.applyItemArmAttackTransform(poseStack, humanoidArm, attack);
             }
 
             applyBlockTransform(poseStack, humanoidArm);
-            itemInHandRenderer.renderItem(player,
-                    itemStack,
-                    isHandSideRight ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND :
-                            ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
-                    poseStack,
+            (hand == InteractionHand.MAIN_HAND ? state.mainHandRenderState : state.offHandRenderState).submit(poseStack,
                     submitNodeCollector,
-                    combinedLight);
+                    lightCoords,
+                    OverlayTexture.NO_OVERLAY,
+                    0);
             poseStack.popPose();
             return EventResult.INTERRUPT;
         } else {
@@ -56,11 +60,14 @@ public class FirstPersonRenderingHandler {
         }
     }
 
+    /**
+     * @see FirstPersonHandsAndItemsRenderer#submitArmWithItem
+     */
     private static void applyBlockTransform(PoseStack poseStack, HumanoidArm humanoidArm) {
         int direction = humanoidArm == HumanoidArm.RIGHT ? 1 : -1;
         poseStack.translate(direction * -0.14142136F, 0.08F, 0.14142136F);
-        poseStack.mulPose(Axis.XP.rotationDegrees(-102.25F));
-        poseStack.mulPose(Axis.YP.rotationDegrees(direction * 13.365F));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(direction * 78.05F));
+        poseStack.rotateDegrees(Axis.XP, -102.25F);
+        poseStack.rotateDegrees(Axis.YP, direction * 13.365F);
+        poseStack.rotateDegrees(Axis.ZP, direction * 78.05F);
     }
 }

@@ -1,7 +1,7 @@
 package fuzs.swordblockingmechanics.neoforge;
 
 import fuzs.puzzleslib.common.api.core.v1.ModConstructor;
-import fuzs.puzzleslib.neoforge.api.data.v2.core.DataProviderHelper;
+import fuzs.puzzleslib.neoforge.api.data.v3.core.DataProviderBuilder;
 import fuzs.swordblockingmechanics.common.SwordBlockingMechanics;
 import fuzs.swordblockingmechanics.common.data.tags.ModItemTagProvider;
 import net.neoforged.fml.common.Mod;
@@ -11,6 +11,6 @@ public class SwordBlockingMechanicsNeoForge {
 
     public SwordBlockingMechanicsNeoForge() {
         ModConstructor.construct(SwordBlockingMechanics.MOD_ID, SwordBlockingMechanics::new);
-        DataProviderHelper.registerDataProviders(SwordBlockingMechanics.MOD_ID, ModItemTagProvider::new);
+        DataProviderBuilder.of(SwordBlockingMechanics.MOD_ID).addProvider(ModItemTagProvider::new);
     }
 }
